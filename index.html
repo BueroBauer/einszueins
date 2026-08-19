@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>einszueins — Leistungsfilter</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #f0ede8;
+    color: #111;
+    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .wordmark {
+    width: 100%;
+    display: block;
+    line-height: 0;
+  }
+
+  .wordmark svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px 14px 8px;
+    font-family: 'Söhne Mono', 'Courier New', monospace;
+    font-size: 13px;
+    gap: 0;
+  }
+
+  .nav-tagline {
+    flex: 0 0 auto;
+    margin-right: auto;
+    font-size: 13px;
+  }
+
+  .nav-group {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    white-space: nowrap;
+  }
+
+  .nav-item .bracket { opacity: 0.5; }
+  .nav-item.active .bracket { opacity: 1; }
+
+  .nav-divider {
+    opacity: 0.3;
+    margin: 0 4px;
+  }
+
+  .nav-external {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: inherit;
+    margin-left: 40px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 220px);
+    padding: 60px 24px;
+  }
+
+  /* ── FILTER SENTENCE ── */
+  .sentence {
+    font-size: clamp(22px, 3.2vw, 44px);
+    font-weight: 400;
+    line-height: 1.1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 48px;
+    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  .dropdown-trigger {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    font-weight: 700;
+    user-select: none;
+  }
+
+  .dropdown-trigger:hover { opacity: 0.65; }
+
+  .chevron {
+    font-size: 0.65em;
+    transition: transform 0.2s ease;
+    display: inline-block;
+    opacity: 0.7;
+  }
+
+  .dropdown-trigger.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── DROPDOWN PANEL ── */
+  .dropdown-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f0ede8;
+    padding: 18px;
+    z-index: 100;
+    min-width: 280px;
+    width: max-content;
+    max-width: min(520px, 90vw);
+  }
+
+  .dropdown-panel.open {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── TAGS ── */
+  .tag {
+    display: inline-block;
+    background: #111;
+    color: #f0ede8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 7px 13px;
+    cursor: pointer;
+    border: 1.5px solid #111;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+    font-family: 'Söhne Mono', 'Courier New', monospace;
+  }
+
+  .tag:hover,
+  .tag.active {
+    background: #f0ede8;
+    color: #111;
+  }
+</style>
+</head>
+<body>
+
+<!-- WORDMARK -->
+<div class="wordmark">
+<svg width="1408" height="162" viewBox="0 0 1408 162" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_945_10018)">
+<path d="M141.389 86.6077H26.6655C28.2158 115.581 42.4788 138.323 70.6946 138.323C93.6393 138.323 105.422 127.731 114.104 108.415L137.048 118.385C122.475 148.915 102.941 162 70.6946 162C23.2548 162 0 123.058 0 81C0 38.9423 23.2548 0 70.6946 0C118.134 0 141.389 35.5154 141.389 74.4577V86.6077ZM28.2158 62.9308H114.104C109.453 40.5 95.8097 23.6769 70.6946 23.6769C45.5794 23.6769 32.8668 40.1885 28.2158 62.9308Z" fill="#231F20"/>
+<path d="M211.774 2.49219V159.508H185.728V2.49219H211.774Z" fill="#231F20"/>
+<path d="M381.999 159.508H355.953V55.7654C355.953 34.2692 346.341 23.6769 328.978 23.6769C305.723 23.6769 284.329 50.1577 284.329 93.7731V159.508H258.283V2.49231H284.329V31.4654C295.801 11.2154 314.405 0 336.109 0C364.635 0 381.999 17.7577 381.999 48.9115V159.508Z" fill="#231F20"/>
+<path d="M521.527 23.9885L503.854 39.2538C493.622 28.0385 486.18 23.6769 475.328 23.6769C464.476 23.6769 456.414 30.8423 456.414 43.6154C456.414 71.9654 528.969 66.0462 528.969 112.154C528.969 143.619 508.815 162 477.188 162C445.562 162 426.958 140.815 418.896 119.631L440.911 107.481C447.732 124.304 459.825 138.323 477.188 138.323C493.002 138.323 502.303 130.223 502.303 113.712C502.303 84.4269 430.369 94.3961 430.369 43.3038C430.369 19.0038 448.042 0 476.258 0C495.482 0 510.675 8.41154 521.527 23.9885Z" fill="#231F20"/>
+<path d="M1020.42 86.6077H905.697C907.247 115.581 921.51 138.323 949.726 138.323C972.67 138.323 984.453 127.731 993.135 108.415L1016.08 118.385C1001.51 148.915 981.972 162 949.726 162C902.286 162 879.031 123.058 879.031 81C879.031 38.9423 902.286 0 949.726 0C997.165 0 1020.42 35.5154 1020.42 74.4577V86.6077ZM907.247 62.9308H993.135C988.484 40.5 974.841 23.6769 949.726 23.6769C924.61 23.6769 911.898 40.1885 907.247 62.9308Z" fill="#231F20"/>
+<path d="M1090.8 2.49219V159.508H1064.76V2.49219H1090.8Z" fill="#231F20"/>
+<path d="M1261.03 159.508H1234.98V55.7654C1234.98 34.2692 1225.37 23.6769 1208.01 23.6769C1184.75 23.6769 1163.36 50.1577 1163.36 93.7731V159.508H1137.31V2.49231H1163.36V31.4654C1174.83 11.2154 1193.44 0 1215.14 0C1243.67 0 1261.03 17.7577 1261.03 48.9115V159.508Z" fill="#231F20"/>
+<path d="M1400.56 23.9885L1382.88 39.2538C1372.65 28.0385 1365.21 23.6769 1354.36 23.6769C1343.51 23.6769 1335.45 30.8423 1335.45 43.6154C1335.45 71.9654 1408 66.0462 1408 112.154C1408 143.619 1387.85 162 1356.22 162C1324.59 162 1305.99 140.815 1297.93 119.631L1319.94 107.481C1326.76 124.304 1338.86 138.323 1356.22 138.323C1372.03 138.323 1381.33 130.223 1381.33 113.712C1381.33 84.4269 1309.4 94.3961 1309.4 43.3038C1309.4 19.0038 1327.07 0 1355.29 0C1374.51 0 1389.71 8.41154 1400.56 23.9885Z" fill="#231F20"/>
+<path d="M566.006 2.49219H670.808V13.7076L596.703 135.831H673.599V159.508H561.976V148.292L635.771 26.1691H566.006V2.49219Z" fill="#231F20"/>
+<path d="M714.527 2.49219H740.573V106.235C740.573 127.731 750.185 138.323 767.548 138.323C790.803 138.323 812.197 111.842 812.197 68.2268V2.49219H838.243V159.508H812.197V130.535C800.725 150.785 782.121 162 760.417 162C731.891 162 714.527 144.242 714.527 113.088V2.49219Z" fill="#231F20"/>
+</g>
+<defs>
+<clipPath id="clip0_945_10018">
+<rect width="1408" height="162" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+</div>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-tagline">Zukunft gestalten</span>
+
+  <div class="nav-group">
+    <a class="nav-item active" href="#">
+      <span class="bracket">[•]</span> Architektur
+    </a>
+    <a class="nav-item" href="#">
+      <span class="bracket">[ ]</span> Forschung
+    </a>
+    <a class="nav-item" href="#">
+      <span class="bracket">[ ]</span> Büro
+    </a>
+    <span class="nav-divider">,</span>
+    <a class="nav-item" href="#">
+      <span class="bracket">[ ]</span> Kontakt
+    </a>
+    <a class="nav-external" href="#">→ HABITAT 2030</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="sentence">
+    <span>Wir planen</span>
+
+    <!-- Dropdown 1 — Kompetenz -->
+    <span class="dropdown-trigger" id="trigger1" onclick="toggleDropdown(1)">
+      <span id="label1">mit Ökobilanzierung</span>
+      <span class="chevron">&#8964;</span>
+
+      <div class="dropdown-panel" id="panel1">
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Ökobilanzierung')">mit Ökobilanzierung</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Holzbaufokus')">mit Holzbaufokus</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Kreislaufstrategie')">mit Kreislaufstrategie</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Bestandstransformation')">mit Bestandstransformation</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Ortskernentwicklung')">mit Ortskernentwicklung</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Wohnbauschwerpunkt')">mit Wohnbauschwerpunkt</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Stadtentwicklungsprozess')">mit Stadtentwicklungsprozess</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Forschungsförderung')">mit Forschungsförderung</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Klimanachweis')">mit Klimanachweis</span>
+        <span class="tag" onclick="selectTag(event, 1, this, 'mit Nutzungsmischung')">mit Nutzungsmischung</span>
+      </div>
+    </span>
+
+    <!-- Dropdown 2 — Zielgruppe -->
+    <span class="dropdown-trigger" id="trigger2" onclick="toggleDropdown(2)">
+      <span id="label2">für gemeinnützige Bauträger</span>
+      <span class="chevron">&#8964;</span>
+
+      <div class="dropdown-panel" id="panel2">
+        <span class="tag" onclick="selectTag(event, 2, this, 'mit Gemeinnützigen Bauträgern')">mit Gemeinnützigen Bauträgern</span>
+        <span class="tag" onclick="selectTag(event, 2, this, 'mit Gewerblichen Bauträgern')">mit Gewerblichen Bauträgern</span>
+        <span class="tag" onclick="selectTag(event, 2, this, 'für Forschungsförderer')">für Forschungsförderer</span>
+        <span class="tag" onclick="selectTag(event, 2, this, 'mit Fachplaner:innen')">mit Fachplaner:innen</span>
+        <span class="tag" onclick="selectTag(event, 2, this, 'mit Kommunen')">mit Kommunen</span>
+        <span class="tag" onclick="selectTag(event, 2, this, 'für Bestandshalter:innen')">für Bestandshalter:innen</span>
+        <span class="tag" onclick="selectTag(event, 2, this, 'mit Baugruppen')">mit Baugruppen</span>
+        <span class="tag" onclick="selectTag(event, 2, this, 'für politische Entscheidungsträger')">für politische Entscheidungsträger</span>
+      </div>
+    </span>
+  </div>
+
+</div>
+
+<script>
+  function toggleDropdown(n) {
+    const other = n === 1 ? 2 : 1;
+    closeDropdown(other);
+    const trigger = document.getElementById('trigger' + n);
+    const panel = document.getElementById('panel' + n);
+    const isOpen = trigger.classList.contains('open');
+    if (isOpen) { closeDropdown(n); }
+    else { trigger.classList.add('open'); panel.classList.add('open'); }
+  }
+
+  function closeDropdown(n) {
+    document.getElementById('trigger' + n).classList.remove('open');
+    document.getElementById('panel' + n).classList.remove('open');
+  }
+
+  function selectTag(e, n, el, value) {
+    e.stopPropagation();
+    el.closest('.dropdown-panel').querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('label' + n).textContent = value;
+    closeDropdown(n);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.dropdown-trigger')) {
+      closeDropdown(1);
+      closeDropdown(2);
+    }
+  });
+</script>
+
+</body>
+</html>
