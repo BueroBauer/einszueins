@@ -34,7 +34,7 @@
     display: flex;
     align-items: center;
     padding: 14px 24px 14px 8px;
-    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Söhne Mono', 'Courier New', monospace;
     font-size: 13px;
     gap: 0;
   }
@@ -68,6 +68,7 @@
   .sentence {
     font-size: clamp(22px, 3.2vw, 44px);
     font-weight: 400;
+    font-family: 'Söhne Mono', 'Courier New', monospace;
     line-height: 1.1;
     display: flex;
     align-items: baseline;
@@ -226,7 +227,7 @@
       <span class="chevron" id="chevron1">&#8964;</span>
     </span>
     <span class="slot" onclick="toggleGroup(2)">
-      <span class="slot-label" id="label2">für unsere Zukunft</span>
+      <span class="slot-label" id="label2">partizipativ</span>
       <span class="chevron" id="chevron2">&#8964;</span>
     </span>
   </div>
@@ -256,10 +257,11 @@
 
     <!-- Gruppe 2 — Für wen -->
     <div class="tag-group" id="group2">
-      <span class="tag active" onclick="selectTag(2, this, 'für Kommunen')">für Kommunen</span>
+      <span class="tag active" onclick="selectTag(2, this, 'partizipativ')">partizipativ</span>
+      <span class="tag" onclick="selectTag(2, this, 'für Kommunen')">für Kommunen</span>
       <span class="tag" onclick="selectTag(2, this, 'für Bauträger')">für Bauträger</span>
       <span class="tag" onclick="selectTag(2, this, 'für Baugruppen')">für Baugruppen</span>
-      <span class="tag" onclick="selectTag(2, this, 'für Bestandsbauten')">für Bestandsbauten</span>
+      <span class="tag" onclick="selectTag(2, this, 'im Bestand')">im Bestand</span>
     </div>
 
   </div>
