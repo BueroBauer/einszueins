@@ -279,8 +279,35 @@
     });
   }
 
-  randomSlot(slot1Options, 'label1', 'group1');
-  randomSlot(slot2Options, 'label2', 'group2');
+  function shuffleIntro(options, labelId, steps, interval, finalVal) {
+    let count = 0;
+    const timer = setInterval(() => {
+      const val = options[Math.floor(Math.random() * options.length)];
+      document.getElementById(labelId).textContent = val;
+      count++;
+      if (count >= steps) {
+        clearInterval(timer);
+        document.getElementById(labelId).textContent = finalVal;
+      }
+    }, interval);
+  }
+
+  // Finale Werte bestimmen
+  const final1 = slot1Options[Math.floor(Math.random() * slot1Options.length)];
+  const final2 = slot2Options[Math.floor(Math.random() * slot2Options.length)];
+
+  // Active-Tags setzen nach Intro
+  setTimeout(() => {
+    document.querySelectorAll('#group1 .tag').forEach(t => {
+      t.classList.toggle('active', t.textContent === final1);
+    });
+    document.querySelectorAll('#group2 .tag').forEach(t => {
+      t.classList.toggle('active', t.textContent === final2);
+    });
+  }, 6 * 800 + 50);
+
+  shuffleIntro(slot1Options, 'label1', 6, 800, final1);
+  setTimeout(() => shuffleIntro(slot2Options, 'label2', 6, 800, final2), 400);
 
   function toggleGroup(n) {
     const other = n === 1 ? 2 : 1;
