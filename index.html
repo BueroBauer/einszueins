@@ -15,13 +15,12 @@
     overflow-x: hidden;
   }
 
-  /* ── HEADER ── */
+  /* ── WORDMARK ── */
   .wordmark {
     width: 100%;
     display: block;
     line-height: 0;
   }
-
   .wordmark svg {
     width: 100%;
     height: auto;
@@ -37,117 +36,71 @@
     font-size: 13px;
     gap: 0;
   }
-
-  .nav-tagline {
-    flex: 0 0 auto;
-    margin-right: auto;
-    font-size: 13px;
-  }
-
-  .nav-group {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-  }
-
+  .nav-tagline { flex: 0 0 auto; margin-right: auto; }
+  .nav-group { display: flex; align-items: center; gap: 32px; }
   .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-    white-space: nowrap;
+    display: flex; align-items: center; gap: 5px;
+    cursor: pointer; text-decoration: none; color: inherit; white-space: nowrap;
   }
-
   .nav-item .bracket { opacity: 0.5; }
   .nav-item.active .bracket { opacity: 1; }
-
-  .nav-divider {
-    opacity: 0.3;
-    margin: 0 4px;
-  }
-
+  .nav-divider { opacity: 0.3; margin: 0 4px; }
   .nav-external {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-    color: inherit;
-    margin-left: 40px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 6px;
+    text-decoration: none; color: inherit; margin-left: 40px;
+    font-weight: 700; letter-spacing: 0.04em;
   }
 
-  /* ── MAIN CONTENT ── */
+  /* ── MAIN ── */
   .main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: calc(100vh - 220px);
-    padding: 60px 24px;
+    padding: 80px 32px 60px;
   }
 
-  /* ── FILTER SENTENCE ── */
+  /* ── SENTENCE ── */
   .sentence {
     font-size: clamp(22px, 3.2vw, 44px);
     font-weight: 400;
     line-height: 1.1;
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 10px;
     flex-wrap: wrap;
     justify-content: center;
-    margin-bottom: 48px;
-    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin-bottom: 56px;
   }
 
-  .dropdown-trigger {
-    position: relative;
+  .slot {
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    cursor: pointer;
-    font-weight: 700;
-    user-select: none;
+    gap: 6px;
+    cursor: default;
   }
 
-  .dropdown-trigger:hover { opacity: 0.65; }
+  .slot-label { border-bottom: 2px solid #111; padding-bottom: 1px; }
 
-  .chevron {
-    font-size: 0.65em;
-    transition: transform 0.2s ease;
-    display: inline-block;
-    opacity: 0.7;
+  .chevron { font-size: 0.6em; opacity: 0.5; }
+
+  /* ── TAG GROUPS ── */
+  .tag-groups {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 960px;
   }
 
-  .dropdown-trigger.open .chevron {
-    transform: rotate(180deg);
-  }
-
-  /* ── DROPDOWN PANEL ── */
-  .dropdown-panel {
-    display: none;
-    position: absolute;
-    top: calc(100% + 20px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #f0ede8;
-    padding: 18px;
-    z-index: 100;
-    min-width: 280px;
-    width: max-content;
-    max-width: min(520px, 90vw);
-  }
-
-  .dropdown-panel.open {
+  .tag-group {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    justify-content: center;
   }
 
-  /* ── TAGS ── */
   .tag {
     display: inline-block;
     background: #111;
@@ -164,10 +117,18 @@
     font-family: 'Söhne Mono', 'Courier New', monospace;
   }
 
-  .tag:hover,
+  .tag:hover { opacity: 0.7; }
+
   .tag.active {
     background: #f0ede8;
     color: #111;
+  }
+
+  .group-divider {
+    width: 100%;
+    max-width: 960px;
+    height: 1px;
+    background: rgba(0,0,0,0.12);
   }
 </style>
 </head>
@@ -199,21 +160,12 @@
 <!-- NAV -->
 <nav>
   <span class="nav-tagline">Zukunft gestalten</span>
-
   <div class="nav-group">
-    <a class="nav-item active" href="#">
-      <span class="bracket">[•]</span> Architektur
-    </a>
-    <a class="nav-item" href="#">
-      <span class="bracket">[ ]</span> Forschung
-    </a>
-    <a class="nav-item" href="#">
-      <span class="bracket">[ ]</span> Büro
-    </a>
+    <a class="nav-item active" href="#"><span class="bracket">[•]</span> Architektur</a>
+    <a class="nav-item" href="#"><span class="bracket">[ ]</span> Forschung</a>
+    <a class="nav-item" href="#"><span class="bracket">[ ]</span> Büro</a>
     <span class="nav-divider">,</span>
-    <a class="nav-item" href="#">
-      <span class="bracket">[ ]</span> Kontakt
-    </a>
+    <a class="nav-item" href="#"><span class="bracket">[ ]</span> Kontakt</a>
     <a class="nav-external" href="#">→ HABITAT 2030</a>
   </div>
 </nav>
@@ -221,81 +173,62 @@
 <!-- MAIN -->
 <div class="main">
 
+  <!-- SENTENCE -->
   <div class="sentence">
     <span>Wir planen</span>
-
-    <!-- Dropdown 1 — Kompetenz -->
-    <span class="dropdown-trigger" id="trigger1" onclick="toggleDropdown(1)">
-      <span id="label1">lebenswerten Wohnraum</span>
+    <span class="slot">
+      <span class="slot-label" id="label1">lebenswerten Wohnraum</span>
       <span class="chevron">&#8964;</span>
-
-      <div class="dropdown-panel" id="panel1">
-        <span class="tag" onclick="selectTag(event, 1, this, 'lebenswerten Wohnraum')">lebenswerten Wohnraum</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'langlebige Gebäude')">langlebige Gebäude</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'ökobilanziert')">ökobilanziert</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'ressourcenschonend')">ressourcenschonend</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'im Einklang mit der Natur')">im Einklang mit der Natur</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'konsequent nachhaltig')">konsequent nachhaltig</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'mit Klimanachweis')">mit Klimanachweis</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'inklusiv')">inklusiv</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'partizipativ')">partizipativ</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'altersgerecht')">altersgerecht</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'Baukosten-optimiert')">Baukosten-optimiert</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'regional verankert')">regional verankert</span>
-        <span class="tag" onclick="selectTag(event, 1, this, 'urban verdichtet')">urban verdichtet</span>
-      </div>
     </span>
-
-    <!-- Dropdown 2 — Zielgruppe -->
-    <span class="dropdown-trigger" id="trigger2" onclick="toggleDropdown(2)">
-      <span id="label2">für gemeinnützige Bauträger</span>
+    <span class="slot">
+      <span class="slot-label" id="label2">für gemeinnützige Bauträger</span>
       <span class="chevron">&#8964;</span>
-
-      <div class="dropdown-panel" id="panel2">
-        <span class="tag" onclick="selectTag(event, 2, this, 'mit Gemeinnützigen Bauträgern')">mit Gemeinnützigen Bauträgern</span>
-        <span class="tag" onclick="selectTag(event, 2, this, 'mit Gewerblichen Bauträgern')">mit Gewerblichen Bauträgern</span>
-        <span class="tag" onclick="selectTag(event, 2, this, 'für Forschungsförderer')">für Forschungsförderer</span>
-        <span class="tag" onclick="selectTag(event, 2, this, 'mit Fachplaner:innen')">mit Fachplaner:innen</span>
-        <span class="tag" onclick="selectTag(event, 2, this, 'mit Kommunen')">mit Kommunen</span>
-        <span class="tag" onclick="selectTag(event, 2, this, 'für Bestandshalter:innen')">für Bestandshalter:innen</span>
-        <span class="tag" onclick="selectTag(event, 2, this, 'mit Baugruppen')">mit Baugruppen</span>
-        <span class="tag" onclick="selectTag(event, 2, this, 'für politische Entscheidungsträger')">für politische Entscheidungsträger</span>
-      </div>
     </span>
   </div>
 
+  <!-- TAG GROUPS -->
+  <div class="tag-groups">
+
+    <!-- Gruppe 1 — Was -->
+    <div class="tag-group" id="group1">
+      <span class="tag active" onclick="selectTag(1, this, 'lebenswerten Wohnraum')">lebenswerten Wohnraum</span>
+      <span class="tag" onclick="selectTag(1, this, 'langlebige Gebäude')">langlebige Gebäude</span>
+      <span class="tag" onclick="selectTag(1, this, 'ökobilanziert')">ökobilanziert</span>
+      <span class="tag" onclick="selectTag(1, this, 'ressourcenschonend')">ressourcenschonend</span>
+      <span class="tag" onclick="selectTag(1, this, 'im Einklang mit der Natur')">im Einklang mit der Natur</span>
+      <span class="tag" onclick="selectTag(1, this, 'konsequent nachhaltig')">konsequent nachhaltig</span>
+      <span class="tag" onclick="selectTag(1, this, 'mit Klimanachweis')">mit Klimanachweis</span>
+      <span class="tag" onclick="selectTag(1, this, 'inklusiv')">inklusiv</span>
+      <span class="tag" onclick="selectTag(1, this, 'partizipativ')">partizipativ</span>
+      <span class="tag" onclick="selectTag(1, this, 'altersgerecht')">altersgerecht</span>
+      <span class="tag" onclick="selectTag(1, this, 'Baukosten-optimiert')">Baukosten-optimiert</span>
+      <span class="tag" onclick="selectTag(1, this, 'regional verankert')">regional verankert</span>
+      <span class="tag" onclick="selectTag(1, this, 'urban verdichtet')">urban verdichtet</span>
+    </div>
+
+    <div class="group-divider"></div>
+
+    <!-- Gruppe 2 — Für wen -->
+    <div class="tag-group" id="group2">
+      <span class="tag active" onclick="selectTag(2, this, 'für gemeinnützige Bauträger')">für gemeinnützige Bauträger</span>
+      <span class="tag" onclick="selectTag(2, this, 'mit gewerblichen Bauträgern')">mit gewerblichen Bauträgern</span>
+      <span class="tag" onclick="selectTag(2, this, 'für Forschungsförderer')">für Forschungsförderer</span>
+      <span class="tag" onclick="selectTag(2, this, 'mit Fachplaner:innen')">mit Fachplaner:innen</span>
+      <span class="tag" onclick="selectTag(2, this, 'mit Kommunen')">mit Kommunen</span>
+      <span class="tag" onclick="selectTag(2, this, 'für Bestandshalter:innen')">für Bestandshalter:innen</span>
+      <span class="tag" onclick="selectTag(2, this, 'mit Baugruppen')">mit Baugruppen</span>
+      <span class="tag" onclick="selectTag(2, this, 'für politische Entscheidungsträger')">für politische Entscheidungsträger</span>
+    </div>
+
+  </div>
 </div>
 
 <script>
-  function toggleDropdown(n) {
-    const other = n === 1 ? 2 : 1;
-    closeDropdown(other);
-    const trigger = document.getElementById('trigger' + n);
-    const panel = document.getElementById('panel' + n);
-    const isOpen = trigger.classList.contains('open');
-    if (isOpen) { closeDropdown(n); }
-    else { trigger.classList.add('open'); panel.classList.add('open'); }
-  }
-
-  function closeDropdown(n) {
-    document.getElementById('trigger' + n).classList.remove('open');
-    document.getElementById('panel' + n).classList.remove('open');
-  }
-
-  function selectTag(e, n, el, value) {
-    e.stopPropagation();
-    el.closest('.dropdown-panel').querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+  function selectTag(group, el, value) {
+    document.querySelectorAll('#group' + group + ' .tag').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('label' + n).textContent = value;
-    closeDropdown(n);
+    document.getElementById('label' + group).textContent = value;
   }
-
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.dropdown-trigger')) {
-      closeDropdown(1);
-      closeDropdown(2);
-    }
-  });
 </script>
 
 </body>
