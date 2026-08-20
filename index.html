@@ -256,8 +256,7 @@
 
     <!-- Gruppe 2 — Für wen -->
     <div class="tag-group" id="group2">
-      <span class="tag active" onclick="selectTag(2, this, 'partizipativ')">partizipativ</span>
-      <span class="tag" onclick="selectTag(2, this, 'für Kommunen')">für Kommunen</span>
+      <span class="tag active" onclick="selectTag(2, this, 'für Kommunen')">für Kommunen</span>
       <span class="tag" onclick="selectTag(2, this, 'für Bauträger')">für Bauträger</span>
       <span class="tag" onclick="selectTag(2, this, 'für Baugruppen')">für Baugruppen</span>
       <span class="tag" onclick="selectTag(2, this, 'im Bestand')">im Bestand</span>
@@ -268,7 +267,7 @@
 
 <script>
   const slot1Options = ['lebenswerten Wohnraum','langlebige Gebäude','ökobilanziert','ressourcenschonend','im Einklang mit der Natur','konsequent nachhaltig','mit Klimanachweis','inklusiv','partizipativ','altersgerecht','Baukosten-optimiert','regional verankert','urban verdichtet'];
-  const slot2Options = ['partizipativ','für Kommunen','für Bauträger','für Baugruppen','im Bestand'];
+  const slot2Options = ['für Kommunen','für Bauträger','für Baugruppen','im Bestand'];
 
   function randomSlot(options, labelId, groupId) {
     const val = options[Math.floor(Math.random() * options.length)];
