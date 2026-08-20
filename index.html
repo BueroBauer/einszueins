@@ -86,7 +86,28 @@
     cursor: default;
   }
 
-  .slot-label { font-weight: 400; }
+  .slot-label {
+    font-weight: 400;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    position: relative;
+    line-height: 1.15;
+  }
+
+  .slot-label .text-current,
+  .slot-label .text-next {
+    display: block;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+  }
+
+  .slot-label .text-next {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(110%);
+  }
 
   .chevron { font-size: 0.6em; opacity: 1; display: inline-block; transition: transform 0.2s ease; transform-origin: center center; }
 
@@ -222,11 +243,11 @@
   <div class="sentence">
     <span>Wir planen</span>
     <span class="slot" onclick="toggleGroup(1)">
-      <span class="slot-label" id="label1">lebenswerten Wohnraum</span>
+      <span class="slot-label" id="label1"><span class="text-current">lebenswerten Wohnraum</span><span class="text-next"></span></span>
       <span class="chevron" id="chevron1">&#8964;</span>
     </span>
     <span class="slot" onclick="toggleGroup(2)">
-      <span class="slot-label" id="label2">partizipativ</span>
+      <span class="slot-label" id="label2"><span class="text-current">partizipativ</span><span class="text-next"></span></span>
       <span class="chevron" id="chevron2">&#8964;</span>
     </span>
   </div>
@@ -279,16 +300,35 @@
     });
   }
 
+  function slideIn(labelId, newVal) {
+    const wrapper = document.getElementById(labelId);
+    const current = wrapper.querySelector('.text-current');
+    const next = wrapper.querySelector('.text-next');
+    next.textContent = newVal;
+    next.style.transition = 'none';
+    next.style.transform = 'translateY(110%)';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      current.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+      next.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+      current.style.transform = 'translateY(-110%)';
+      next.style.transform = 'translateY(0)';
+    }));
+    setTimeout(() => {
+      current.textContent = newVal;
+      current.style.transition = 'none';
+      current.style.transform = '';
+      next.style.transform = 'translateY(110%)';
+      next.textContent = '';
+    }, 420);
+  }
+
   function shuffleIntro(options, labelId, steps, interval, finalVal) {
     let count = 0;
     const timer = setInterval(() => {
-      const val = options[Math.floor(Math.random() * options.length)];
-      document.getElementById(labelId).textContent = val;
       count++;
-      if (count >= steps) {
-        clearInterval(timer);
-        document.getElementById(labelId).textContent = finalVal;
-      }
+      const val = count >= steps ? finalVal : options[Math.floor(Math.random() * options.length)];
+      slideIn(labelId, val);
+      if (count >= steps) clearInterval(timer);
     }, interval);
   }
 
@@ -335,7 +375,7 @@
   function selectTag(group, el, value) {
     document.querySelectorAll('#group' + group + ' .tag').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('label' + group).textContent = value;
+    slideIn('label' + group, value);
     closeGroup(group);
   }
 
