@@ -267,6 +267,22 @@
 </div>
 
 <script>
+  const slot1Options = ['lebenswerten Wohnraum','langlebige Gebäude','ökobilanziert','ressourcenschonend','im Einklang mit der Natur','konsequent nachhaltig','mit Klimanachweis','inklusiv','partizipativ','altersgerecht','Baukosten-optimiert','regional verankert','urban verdichtet'];
+  const slot2Options = ['partizipativ','für Kommunen','für Bauträger','für Baugruppen','im Bestand'];
+
+  function randomSlot(options, labelId, groupId) {
+    const val = options[Math.floor(Math.random() * options.length)];
+    document.getElementById(labelId).textContent = val;
+    const active = document.querySelector('#' + groupId + ' .tag.active');
+    if (active) active.classList.remove('active');
+    document.querySelectorAll('#' + groupId + ' .tag').forEach(t => {
+      if (t.textContent === val) t.classList.add('active');
+    });
+  }
+
+  randomSlot(slot1Options, 'label1', 'group1');
+  randomSlot(slot2Options, 'label2', 'group2');
+
   function toggleGroup(n) {
     const other = n === 1 ? 2 : 1;
     closeGroup(other);
