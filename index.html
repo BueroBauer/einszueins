@@ -87,7 +87,7 @@
 
   .slot-label { font-weight: 400; }
 
-  .chevron { font-size: 0.6em; opacity: 1; }
+  .chevron { font-size: 0.6em; opacity: 1; display: inline-block; transition: transform 0.2s ease; transform-origin: center center; }
 
   /* ── TAG GROUPS ── */
   .tag-groups {
@@ -237,7 +237,7 @@
     if (isOpen) { closeGroup(n); }
     else {
       g.classList.add('open');
-      document.getElementById('chevron' + n).style.transform = 'rotate(180deg)';
+      document.getElementById('chevron' + n).style.transform = 'rotate(90deg)';
       updateDivider();
     }
   }
