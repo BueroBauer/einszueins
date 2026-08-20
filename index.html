@@ -304,10 +304,10 @@
     document.querySelectorAll('#group2 .tag').forEach(t => {
       t.classList.toggle('active', t.textContent === final2);
     });
-  }, 6 * 800 + 50);
+  }, 6 * 1600 + 800 + 50);
 
-  shuffleIntro(slot1Options, 'label1', 6, 800, final1);
-  setTimeout(() => shuffleIntro(slot2Options, 'label2', 6, 800, final2), 400);
+  shuffleIntro(slot1Options, 'label1', 6, 1600, final1);
+  setTimeout(() => shuffleIntro(slot2Options, 'label2', 6, 1600, final2), 800);
 
   function toggleGroup(n) {
     const other = n === 1 ? 2 : 1;
