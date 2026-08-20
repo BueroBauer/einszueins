@@ -34,7 +34,7 @@
     display: flex;
     align-items: center;
     padding: 14px 24px 14px 8px;
-    font-family: 'Söhne Mono', 'Courier New', monospace;
+    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 13px;
     gap: 0;
   }
@@ -92,7 +92,6 @@
   /* ── TAG GROUPS ── */
   .tag-groups {
     position: absolute;
-    top: calc(50% + 30px);
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -101,6 +100,27 @@
     gap: 16px;
     width: 90%;
     max-width: 960px;
+    pointer-events: none;
+  }
+
+  #group1 {
+    position: absolute;
+    top: calc(50% + 30px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 960px;
+    justify-content: center;
+  }
+
+  #group2 {
+    position: absolute;
+    bottom: calc(50% + 30px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 960px;
+    justify-content: center;
   }
 
   .tag-group {
@@ -144,7 +164,7 @@
     border-radius: 10px;
     transition: background 0.12s, color 0.12s;
     white-space: nowrap;
-    font-family: 'Söhne Mono', 'Courier New', monospace;
+    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 
   .tag:hover { opacity: 0.7; }
