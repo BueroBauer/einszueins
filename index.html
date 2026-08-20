@@ -95,10 +95,14 @@
   }
 
   .tag-group {
-    display: flex;
+    display: none;
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
+  }
+
+  .tag-group.open {
+    display: flex;
   }
 
   .tag {
@@ -125,11 +129,14 @@
   }
 
   .group-divider {
+    display: none;
     width: 100%;
     max-width: 960px;
     height: 1px;
     background: rgba(0,0,0,0.12);
   }
+
+  .group-divider.open { display: block; }
 </style>
 </head>
 <body>
@@ -176,13 +183,13 @@
   <!-- SENTENCE -->
   <div class="sentence">
     <span>Wir planen</span>
-    <span class="slot">
+    <span class="slot" onclick="toggleGroup(1)">
       <span class="slot-label" id="label1">lebenswerten Wohnraum</span>
-      <span class="chevron">&#8964;</span>
+      <span class="chevron" id="chevron1">&#8964;</span>
     </span>
-    <span class="slot">
+    <span class="slot" onclick="toggleGroup(2)">
       <span class="slot-label" id="label2">für Kommunen</span>
-      <span class="chevron">&#8964;</span>
+      <span class="chevron" id="chevron2">&#8964;</span>
     </span>
   </div>
 
@@ -220,11 +227,43 @@
 </div>
 
 <script>
+  function toggleGroup(n) {
+    const other = n === 1 ? 2 : 1;
+    closeGroup(other);
+    const g = document.getElementById('group' + n);
+    const isOpen = g.classList.contains('open');
+    if (isOpen) { closeGroup(n); }
+    else {
+      g.classList.add('open');
+      document.getElementById('chevron' + n).style.transform = 'rotate(180deg)';
+      updateDivider();
+    }
+  }
+
+  function closeGroup(n) {
+    document.getElementById('group' + n).classList.remove('open');
+    document.getElementById('chevron' + n).style.transform = '';
+    updateDivider();
+  }
+
+  function updateDivider() {
+    const anyOpen = document.getElementById('group1').classList.contains('open') ||
+                    document.getElementById('group2').classList.contains('open');
+    document.querySelector('.group-divider').classList.toggle('open', anyOpen);
+  }
+
   function selectTag(group, el, value) {
     document.querySelectorAll('#group' + group + ' .tag').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('label' + group).textContent = value;
+    closeGroup(group);
   }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.slot') && !e.target.closest('.tag-group')) {
+      closeGroup(1); closeGroup(2);
+    }
+  });
 </script>
 
 </body>
