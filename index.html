@@ -189,10 +189,7 @@
       <span class="slot-label" id="label1">lebenswerten Wohnraum</span>
       <span class="chevron" id="chevron1">&#8964;</span>
     </span>
-    <span class="slot" onclick="toggleGroup(2)">
-      <span class="slot-label" id="label2">für Kommunen</span>
-      <span class="chevron" id="chevron2">&#8964;</span>
-    </span>
+    <span>für unsere Zukunft</span>
   </div>
 
   <!-- TAG GROUPS -->
@@ -217,41 +214,26 @@
 
     <div class="group-divider"></div>
 
-    <!-- Gruppe 2 — Für wen -->
-    <div class="tag-group" id="group2">
-      <span class="tag active" onclick="selectTag(2, this, 'für Kommunen')">für Kommunen</span>
-      <span class="tag" onclick="selectTag(2, this, 'für Bauträger')">für Bauträger</span>
-      <span class="tag" onclick="selectTag(2, this, 'für Baugruppen')">für Baugruppen</span>
-      <span class="tag" onclick="selectTag(2, this, 'für Bestandsbauten')">für Bestandsbauten</span>
-    </div>
 
   </div>
 </div>
 
 <script>
   function toggleGroup(n) {
-    const other = n === 1 ? 2 : 1;
-    closeGroup(other);
     const g = document.getElementById('group' + n);
     const isOpen = g.classList.contains('open');
     if (isOpen) { closeGroup(n); }
     else {
       g.classList.add('open');
       document.getElementById('chevron' + n).style.transform = 'rotate(90deg)';
-      updateDivider();
     }
   }
 
   function closeGroup(n) {
-    document.getElementById('group' + n).classList.remove('open');
+    const g = document.getElementById('group' + n);
+    if (!g) return;
+    g.classList.remove('open');
     document.getElementById('chevron' + n).style.transform = '';
-    updateDivider();
-  }
-
-  function updateDivider() {
-    const anyOpen = document.getElementById('group1').classList.contains('open') ||
-                    document.getElementById('group2').classList.contains('open');
-    document.querySelector('.group-divider').classList.toggle('open', anyOpen);
   }
 
   function selectTag(group, el, value) {
@@ -263,7 +245,7 @@
 
   document.addEventListener('click', function(e) {
     if (!e.target.closest('.slot') && !e.target.closest('.tag-group')) {
-      closeGroup(1); closeGroup(2);
+      closeGroup(1);
     }
   });
 </script>
