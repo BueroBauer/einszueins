@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>einszueins — v2 mit Bild</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #f0ede8;
+    color: #111;
+    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── WORDMARK ── */
+  .wordmark { width: 100%; display: block; line-height: 0; padding: 20px; }
+  .wordmark svg { width: 100%; height: auto; display: block; }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px 14px 28px;
+    font-family: 'Söhne Mono', 'Courier New', monospace;
+    font-size: 18px;
+    gap: 0;
+  }
+  .nav-tagline { flex: 0 0 auto; margin-right: auto; }
+  .nav-group { display: flex; align-items: center; gap: 32px; }
+  .nav-item { display: flex; align-items: center; gap: 5px; cursor: pointer; text-decoration: none; color: inherit; white-space: nowrap; }
+  .nav-item .bracket { opacity: 0.5; }
+  .nav-external { display: flex; align-items: center; gap: 6px; text-decoration: none; color: inherit; margin-left: 40px; font-weight: 700; letter-spacing: 0.04em; }
+
+  /* ── MAIN ── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 32px 40px;
+    position: relative;
+  }
+
+  /* ── IMAGE ── */
+  .image-container {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    min-height: 200px;
+    margin-top: 48px;
+  }
+
+  .image-container img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .image-container img.active {
+    opacity: 1;
+  }
+
+  /* ── SENTENCE ── */
+  .sentence {
+    font-size: clamp(22px, 3.2vw, 44px);
+    font-weight: 400;
+    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    line-height: 1.1;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 56px;
+  }
+
+  .slot { display: inline-flex; align-items: center; gap: 6px; cursor: default; }
+
+  .slot-label {
+    font-weight: 400;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    position: relative;
+    line-height: 1.15;
+  }
+
+  .slot-label .text-current,
+  .slot-label .text-next {
+    display: block;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+  }
+
+  .slot-label .text-next {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(110%);
+  }
+
+  .chevron { font-size: 0.6em; opacity: 1; display: inline-block; transition: transform 0.2s ease; transform-origin: center center; }
+
+  /* ── TAGS ── */
+  .tag-groups {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 90%;
+    max-width: 960px;
+    pointer-events: none;
+  }
+
+  #group1 { position: absolute; top: calc(50% + 30px); left: 50%; transform: translateX(-50%); width: 90vw; max-width: 960px; justify-content: center; }
+  #group2 { position: absolute; top: calc(50% + 30px); left: 50%; transform: translateX(-50%); width: 90vw; max-width: 960px; justify-content: center; }
+
+  .tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .tag-group.open { visibility: visible; opacity: 1; pointer-events: all; }
+
+  .tag-group .tag { opacity: 0; transform: translateY(-8px); transition: opacity 0.18s ease, transform 0.18s ease; }
+  .tag-group.open .tag { opacity: 1; transform: translateY(0); }
+
+  .tag {
+    display: inline-block;
+    background: #111;
+    color: #f0ede8;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 10px 19px;
+    cursor: pointer;
+    border: 1.5px solid #111;
+    border-radius: 10px;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+    font-family: 'Söhne', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  .tag:hover { opacity: 0.7; }
+  .tag.active { background: #f0ede8; color: #111; }
+
+  .group-divider { display: none; }
+</style>
+</head>
+<body>
+
+<!-- WORDMARK -->
+<div class="wordmark">
+<svg width="1408" height="162" viewBox="0 0 1408 162" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_945_10018)">
+<path d="M141.389 86.6077H26.6655C28.2158 115.581 42.4788 138.323 70.6946 138.323C93.6393 138.323 105.422 127.731 114.104 108.415L137.048 118.385C122.475 148.915 102.941 162 70.6946 162C23.2548 162 0 123.058 0 81C0 38.9423 23.2548 0 70.6946 0C118.134 0 141.389 35.5154 141.389 74.4577V86.6077ZM28.2158 62.9308H114.104C109.453 40.5 95.8097 23.6769 70.6946 23.6769C45.5794 23.6769 32.8668 40.1885 28.2158 62.9308Z" fill="#231F20"/>
+<path d="M211.774 2.49219V159.508H185.728V2.49219H211.774Z" fill="#231F20"/>
+<path d="M381.999 159.508H355.953V55.7654C355.953 34.2692 346.341 23.6769 328.978 23.6769C305.723 23.6769 284.329 50.1577 284.329 93.7731V159.508H258.283V2.49231H284.329V31.4654C295.801 11.2154 314.405 0 336.109 0C364.635 0 381.999 17.7577 381.999 48.9115V159.508Z" fill="#231F20"/>
+<path d="M521.527 23.9885L503.854 39.2538C493.622 28.0385 486.18 23.6769 475.328 23.6769C464.476 23.6769 456.414 30.8423 456.414 43.6154C456.414 71.9654 528.969 66.0462 528.969 112.154C528.969 143.619 508.815 162 477.188 162C445.562 162 426.958 140.815 418.896 119.631L440.911 107.481C447.732 124.304 459.825 138.323 477.188 138.323C493.002 138.323 502.303 130.223 502.303 113.712C502.303 84.4269 430.369 94.3961 430.369 43.3038C430.369 19.0038 448.042 0 476.258 0C495.482 0 510.675 8.41154 521.527 23.9885Z" fill="#231F20"/>
+<path d="M1020.42 86.6077H905.697C907.247 115.581 921.51 138.323 949.726 138.323C972.67 138.323 984.453 127.731 993.135 108.415L1016.08 118.385C1001.51 148.915 981.972 162 949.726 162C902.286 162 879.031 123.058 879.031 81C879.031 38.9423 902.286 0 949.726 0C997.165 0 1020.42 35.5154 1020.42 74.4577V86.6077ZM907.247 62.9308H993.135C988.484 40.5 974.841 23.6769 949.726 23.6769C924.61 23.6769 911.898 40.1885 907.247 62.9308Z" fill="#231F20"/>
+<path d="M1090.8 2.49219V159.508H1064.76V2.49219H1090.8Z" fill="#231F20"/>
+<path d="M1261.03 159.508H1234.98V55.7654C1234.98 34.2692 1225.37 23.6769 1208.01 23.6769C1184.75 23.6769 1163.36 50.1577 1163.36 93.7731V159.508H1137.31V2.49231H1163.36V31.4654C1174.83 11.2154 1193.44 0 1215.14 0C1243.67 0 1261.03 17.7577 1261.03 48.9115V159.508Z" fill="#231F20"/>
+<path d="M1400.56 23.9885L1382.88 39.2538C1372.65 28.0385 1365.21 23.6769 1354.36 23.6769C1343.51 23.6769 1335.45 30.8423 1335.45 43.6154C1335.45 71.9654 1408 66.0462 1408 112.154C1408 143.619 1387.85 162 1356.22 162C1324.59 162 1305.99 140.815 1297.93 119.631L1319.94 107.481C1326.76 124.304 1338.86 138.323 1356.22 138.323C1372.03 138.323 1381.33 130.223 1381.33 113.712C1381.33 84.4269 1309.4 94.3961 1309.4 43.3038C1309.4 19.0038 1327.07 0 1355.29 0C1374.51 0 1389.71 8.41154 1400.56 23.9885Z" fill="#231F20"/>
+<path d="M566.006 2.49219H670.808V13.7076L596.703 135.831H673.599V159.508H561.976V148.292L635.771 26.1691H566.006V2.49219Z" fill="#231F20"/>
+<path d="M714.527 2.49219H740.573V106.235C740.573 127.731 750.185 138.323 767.548 138.323C790.803 138.323 812.197 111.842 812.197 68.2268V2.49219H838.243V159.508H812.197V130.535C800.725 150.785 782.121 162 760.417 162C731.891 162 714.527 144.242 714.527 113.088V2.49219Z" fill="#231F20"/>
+</g>
+<defs><clipPath id="clip0_945_10018"><rect width="1408" height="162" fill="white"/></clipPath></defs>
+</svg>
+</div>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-tagline">Zukunft gestalten</span>
+  <div class="nav-group">
+    <a class="nav-item" href="#"><span class="bracket">[ ]</span> Architektur</a>
+    <a class="nav-item" href="#"><span class="bracket">[ ]</span> Forschung</a>
+    <a class="nav-item" href="#"><span class="bracket">[ ]</span> Büro</a>
+    <a class="nav-item" href="#"><span class="bracket">[ ]</span> Kontakt</a>
+    <a class="nav-external" href="#">→ HABITAT 2030</a>
+  </div>
+</nav>
+
+<!-- IMAGE -->
+<div class="image-container">
+  <img src="img/img1.jpg" class="active" id="proj-img-0" alt="">
+  <img src="img/img2.jpg" id="proj-img-1" alt="">
+  <img src="img/img3.jpg" id="proj-img-2" alt="">
+  <img src="img/img4.jpg" id="proj-img-3" alt="">
+  <img src="img/img5.png" id="proj-img-4" alt="">
+  <img src="img/img6.png" id="proj-img-5" alt="">
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SENTENCE -->
+  <div class="sentence">
+    <span>Wir planen</span>
+    <span class="slot" onclick="toggleGroup(1)">
+      <span class="slot-label" id="label1"><span class="text-current">lebenswerten Wohnraum</span><span class="text-next"></span></span>
+      <span class="chevron" id="chevron1">&#8964;</span>
+    </span>
+    <span class="slot" onclick="toggleGroup(2)">
+      <span class="slot-label" id="label2"><span class="text-current">für Kommunen</span><span class="text-next"></span></span>
+      <span class="chevron" id="chevron2">&#8964;</span>
+    </span>
+  </div>
+
+  <!-- TAG GROUPS -->
+  <div class="tag-groups">
+    <div class="tag-group" id="group1">
+      <span class="tag" onclick="selectTag(1, this, 'lebenswerten Wohnraum')">lebenswerten Wohnraum</span>
+      <span class="tag" onclick="selectTag(1, this, 'langlebige Gebäude')">langlebige Gebäude</span>
+      <span class="tag" onclick="selectTag(1, this, 'ökobilanziert')">ökobilanziert</span>
+      <span class="tag" onclick="selectTag(1, this, 'ressourcenschonend')">ressourcenschonend</span>
+      <span class="tag" onclick="selectTag(1, this, 'im Einklang mit der Natur')">im Einklang mit der Natur</span>
+      <span class="tag" onclick="selectTag(1, this, 'konsequent nachhaltig')">konsequent nachhaltig</span>
+      <span class="tag" onclick="selectTag(1, this, 'mit Klimanachweis')">mit Klimanachweis</span>
+      <span class="tag" onclick="selectTag(1, this, 'inklusiv')">inklusiv</span>
+      <span class="tag" onclick="selectTag(1, this, 'partizipativ')">partizipativ</span>
+      <span class="tag" onclick="selectTag(1, this, 'altersgerecht')">altersgerecht</span>
+      <span class="tag" onclick="selectTag(1, this, 'Baukosten-optimiert')">Baukosten-optimiert</span>
+      <span class="tag" onclick="selectTag(1, this, 'regional verankert')">regional verankert</span>
+      <span class="tag" onclick="selectTag(1, this, 'urban verdichtet')">urban verdichtet</span>
+    </div>
+    <div class="group-divider"></div>
+    <div class="tag-group" id="group2">
+      <span class="tag active" onclick="selectTag(2, this, 'für Kommunen')">für Kommunen</span>
+      <span class="tag" onclick="selectTag(2, this, 'für Bauträger')">für Bauträger</span>
+      <span class="tag" onclick="selectTag(2, this, 'für Baugruppen')">für Baugruppen</span>
+      <span class="tag" onclick="selectTag(2, this, 'im Bestand')">im Bestand</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const slot1Options = ['lebenswerten Wohnraum','langlebige Gebäude','ökobilanziert','ressourcenschonend','im Einklang mit der Natur','konsequent nachhaltig','mit Klimanachweis','inklusiv','partizipativ','altersgerecht','Baukosten-optimiert','regional verankert','urban verdichtet'];
+  const slot2Options = ['für Kommunen','für Bauträger','für Baugruppen','im Bestand'];
+
+  const images = document.querySelectorAll('.image-container img');
+  let currentImg = 0;
+
+  function switchImage() {
+    images[currentImg].classList.remove('active');
+    currentImg = (currentImg + 1) % images.length;
+    images[currentImg].classList.add('active');
+  }
+
+  function slideIn(labelId, newVal) {
+    const wrapper = document.getElementById(labelId);
+    const current = wrapper.querySelector('.text-current');
+    const next = wrapper.querySelector('.text-next');
+    next.textContent = newVal;
+    next.style.transition = 'none';
+    next.style.transform = 'translateY(110%)';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      current.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+      next.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+      current.style.transform = 'translateY(-110%)';
+      next.style.transform = 'translateY(0)';
+    }));
+    setTimeout(() => {
+      current.textContent = newVal;
+      current.style.transition = 'none';
+      current.style.transform = '';
+      next.style.transform = 'translateY(110%)';
+      next.textContent = '';
+    }, 420);
+  }
+
+  function shuffleIntro(options, labelId, steps, interval, finalVal, withImage) {
+    let count = 0;
+    const timer = setInterval(() => {
+      count++;
+      const val = count >= steps ? finalVal : options[Math.floor(Math.random() * options.length)];
+      slideIn(labelId, val);
+      if (withImage) switchImage();
+      if (count >= steps) clearInterval(timer);
+    }, interval);
+  }
+
+  const final1 = slot1Options[Math.floor(Math.random() * slot1Options.length)];
+  const final2 = slot2Options[Math.floor(Math.random() * slot2Options.length)];
+
+  setTimeout(() => {
+    document.querySelectorAll('#group1 .tag').forEach(t => t.classList.toggle('active', t.textContent === final1));
+    document.querySelectorAll('#group2 .tag').forEach(t => t.classList.toggle('active', t.textContent === final2));
+  }, 5 * 800 + 400 + 50);
+
+  shuffleIntro(slot1Options, 'label1', 4, 800, final1, true);
+  setTimeout(() => shuffleIntro(slot2Options, 'label2', 3, 800, final2, true), 400);
+
+
+  function toggleGroup(n) {
+    const other = n === 1 ? 2 : 1;
+    closeGroup(other);
+    const g = document.getElementById('group' + n);
+    const isOpen = g.classList.contains('open');
+    if (isOpen) { closeGroup(n); }
+    else {
+      g.classList.add('open');
+      document.getElementById('chevron' + n).style.transform = 'rotate(90deg)';
+      g.querySelectorAll('.tag').forEach((tag, i) => { tag.style.transitionDelay = (i * 30) + 'ms'; });
+    }
+  }
+
+  function closeGroup(n) {
+    const g = document.getElementById('group' + n);
+    if (!g) return;
+    g.querySelectorAll('.tag').forEach(tag => tag.style.transitionDelay = '0ms');
+    g.classList.remove('open');
+    document.getElementById('chevron' + n).style.transform = '';
+  }
+
+  function selectTag(group, el, value) {
+    document.querySelectorAll('#group' + group + ' .tag').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    slideIn('label' + group, value);
+    switchImage();
+    closeGroup(group);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.slot') && !e.target.closest('.tag-group')) {
+      closeGroup(1); closeGroup(2);
+    }
+  });
+</script>
+
+</body>
+</html>
