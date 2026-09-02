@@ -241,8 +241,9 @@
     }
 
     .hero-eins {
-      height: 26.4vh;
+      height: clamp(60px, 26.4vh, 38vw);
       width: auto;
+      max-width: 80%;
       display: block;
     }
 
@@ -253,8 +254,9 @@
     }
 
     .left-item--hero .img-fill img.hero-eins {
-      height: 26.4vh;
+      height: clamp(60px, 26.4vh, 38vw);
       width: auto;
+      max-width: 80%;
       object-fit: unset;
     }
 
@@ -275,7 +277,7 @@
     }
 
     .colon-overlay img {
-      height: 20.8vh;
+      height: clamp(48px, 20.8vh, 30vw);
       width: auto;
       display: block;
     }
