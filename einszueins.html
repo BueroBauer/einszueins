@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dual Scroll Dummy</title>
+  <style>
+    @font-face {
+      font-family: 'ApercuPro';
+      src: url('ApercuPro.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'ApercuPro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: calc(50% + 20px);
+      width: calc(50% - 20px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 40px 24px 0;
+      z-index: 200;
+      mix-blend-mode: difference;
+    }
+
+    .nav-logo {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .nav-link {
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── OUTER WRAPPER ─── */
+    .homescroll {
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ─── DIVIDER LINE ─── */
+    .divider {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      width: 1px;
+      height: 100vh;
+      background: rgba(255,255,255,0.2);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    /* ─── RIGHT PANEL — vertical scroll, content in right half ─── */
+    .right {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100%;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .right::-webkit-scrollbar { display: none; }
+
+    .right-item {
+      height: 100vh;
+      width: 100%;
+      padding-left: calc(50% + 20px);
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 40px;
+    }
+
+    .right-item .label {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.4;
+      margin-bottom: 12px;
+    }
+
+    .right-item h2 {
+      font-size: clamp(22px, 3.2vw, 52px);
+      font-weight: 400;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .right-item .mehr {
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      line-height: 1;
+      margin-top: clamp(6px, 0.8vw, 13px);
+      color: #fff;
+      text-decoration: none;
+    }
+    .right-item .mehr::before {
+      content: '';
+      display: block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      flex-shrink: 0;
+      opacity: 0;
+      max-width: 0;
+      margin-right: 0;
+      overflow: hidden;
+      transition: max-width 0.3s ease, margin-right 0.3s ease, opacity 0.2s ease;
+    }
+
+    .right-item p {
+      font-size: 13px;
+      line-height: 1.7;
+      opacity: 0.55;
+      max-width: 340px;
+    }
+
+    .right-item .tags {
+      margin-top: 20px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 4px 10px;
+      border-radius: 2px;
+      opacity: 0.6;
+    }
+
+    /* ─── LEFT PANEL — horizontal scroll, overlaid ─── */
+    .left {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(50vw);
+      height: 100vh;
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      pointer-events: none;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+
+    .left::-webkit-scrollbar { display: none; }
+
+    .left-item {
+      width: 50vw;
+      height: 100vh;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Placeholder image blocks mit farbigen Flächen */
+    .left-item .img-fill {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .left-item .img-fill span {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.3;
+    }
+
+    .left-item .img-fill img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* individuelle Hintergrundfarben pro Slide */
+    .left-item:nth-child(1)  .img-fill { background: #1a1a2e; }
+    .left-item:nth-child(2)  .img-fill { background: #16213e; }
+    .left-item:nth-child(3)  .img-fill { background: #0f3460; }
+    .left-item:nth-child(4)  .img-fill { background: #1b2838; }
+    .left-item:nth-child(5)  .img-fill { background: #1c1c1c; }
+    .left-item:nth-child(6)  .img-fill { background: #2d1b33; }
+    .left-item:nth-child(7)  .img-fill { background: #0d1b2a; }
+    .left-item:nth-child(8)  .img-fill { background: #1e2d40; }
+    .left-item:nth-child(9)  .img-fill { background: #12202c; }
+    .left-item:nth-child(10) .img-fill { background: #1a1a1a; }
+    .left-item:nth-child(11) .img-fill { background: #231f20; }
+    .left-item:nth-child(12) .img-fill { background: #111827; }
+    .left-item:nth-child(13) .img-fill { background: #0e1a2b; }
+    .left-item:nth-child(14) .img-fill { background: #1c2333; }
+    .left-item:nth-child(15) .img-fill { background: #18202c; }
+    .left-item:nth-child(16) .img-fill { background: #14213d; }
+    .left-item:nth-child(17) .img-fill { background: #1d2d44; }
+    .left-item:nth-child(18) .img-fill { background: #0c1a26; }
+    .left-item:nth-child(19) .img-fill { background: #1b1f2e; }
+    .left-item:nth-child(20) .img-fill { background: #22293a; }
+
+    .left-item .num { display: none; }
+
+    /* ─── HERO SLIDE ─── */
+    .right-item--hero {
+      padding-left: 50%;
+      padding-right: 0;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-eins {
+      height: 26.4vh;
+      width: auto;
+      display: block;
+    }
+
+    /* linkes hero-item: eins mittig in linker Hälfte */
+    .left-item--hero .img-fill {
+      align-items: center;
+      justify-content: center;
+    }
+
+    .left-item--hero .img-fill img.hero-eins {
+      height: 26.4vh;
+      width: auto;
+      object-fit: unset;
+    }
+
+    /* Doppelpunkt Overlay */
+    .colon-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 150;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .colon-overlay.active {
+      opacity: 1;
+    }
+
+    .colon-overlay img {
+      height: 20.8vh;
+      width: auto;
+      display: block;
+    }
+
+    /* ─── SCROLL INDICATOR ─── */
+    .scroll-indicator {
+      position: fixed;
+      bottom: 32px;
+      right: 40px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 1;
+    }
+
+    .scroll-indicator span {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+    }
+
+    .scroll-indicator .line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, #fff, #fff) no-repeat top/1px 0%;
+      animation: scrollGrow 2.6s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .right-item .mehr:hover::before {
+      opacity: 1;
+      max-width: 10px;
+      margin-right: 12px;
+      animation: blink 0.8s ease-in-out infinite;
+    }
+
+    @keyframes scrollGrow {
+      0%   { background-size: 1px 0%; }
+      80%  { background-size: 1px 100%; }
+      100% { background-size: 1px 100%; }
+    }
+
+    /* ─── COUNTER ─── */
+    .counter {
+      position: fixed;
+      bottom: 32px;
+      left: 40px;
+      z-index: 200;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: #fff;
+      opacity: 1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    @keyframes ring-fill {
+      from { stroke-dashoffset: 43.98; }
+      to   { stroke-dashoffset: 0; }
+    }
+    #auto-ring-arc {
+      animation: ring-fill 5s linear forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-link" href="#">Projekte</a>
+    <a class="nav-link" href="#">Aktuelles</a>
+    <a class="nav-link" href="#">Team</a>
+    <a class="nav-link" href="#">Büro</a>
+    <a class="nav-link" href="#">Kontakt</a>
+  </nav>
+
+  <div class="homescroll">
+
+    <div class="divider"></div>
+
+    <!-- LEFT: horizontal scroll panel -->
+    <div class="left" id="leftPanel">
+
+      <div class="left-item">
+        <div class="img-fill"><img src="../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/033-20260620-PNL_7044-607-Laubengangfest-Luiza%20Puiu.jpg" alt=""></div>
+        <div class="num">01</div>
+      </div>
+      <div class="left-item left-item--hero">
+        <div class="img-fill" style="background-image:url('../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/005-20260727-DSC_9162-799-Gerhild-LeLac-Luiza%20Puiu.jpg'); background-size:cover; background-position:center; justify-content:center;">
+          <img src="../Desktop/Group%20233.svg" class="hero-eins" alt="eins">
+        </div>
+      </div>
+
+
+      <div class="left-item">
+        <div class="img-fill"><img src="../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/201907050806-0011-PNL_6854-Philipp%20Naderer-Puiu.jpg" alt=""></div>
+        <div class="num">02</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/07_Platten%20auf%20LKW.jpg" alt=""></div>
+        <div class="num">03</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/046-20260621-DSC_4368-411-Gleis%2021-Luiza%20Puiu.jpg" alt=""></div>
+        <div class="num">04</div>
+      </div>
+      <div class="left-item left-item--hero">
+        <div class="img-fill" style="background-image:url('../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/017-20260629-PNL_8057-240-Vis%20a%20Wien-Luiza%20Puiu.jpg'); background-size:cover; background-position:center; justify-content:center;">
+          <img src="../Desktop/Group%20233.svg" class="hero-eins" alt="eins">
+        </div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/2024-05-04_12-37-DSC_2926-141-Luiza%20Puiu.jpg" alt=""></div>
+        <div class="num">12</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/Auenweide_DSC6047_33_38_exp_A4.jpg" alt=""></div>
+        <div class="num">14</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/Gleis21_DSC5043_exp_A4.jpg" alt=""></div>
+        <div class="num">15</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="../Documents/Obsidian/MeinVault/01_Projekte/Einszueins/Material/Startpics_compressed/IMG_3101.jpg" alt=""></div>
+        <div class="num">16</div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: vertical scroll panel -->
+    <div class="right" id="rightPanel">
+
+      <div class="right-item">
+        <h2 class="lead-question">Wie kann Planen und Bauen innerhalb der planetaren Grenzen gelingen?</h2>
+        <a href="#" class="mehr">Mehr Erfahren</a>
+      </div>
+      <div class="right-item right-item--hero" data-hero="true">
+        <img src="../Desktop/Group%20233.svg" class="hero-eins" alt="eins">
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Begleiten und Beraten</h2>
+        <a href="#" class="mehr">Mehr Erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Forschen und Entwickeln</h2>
+        <a href="#" class="mehr">Mehr Erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Planen und Bauen</h2>
+        <a href="#" class="mehr">Mehr Erfahren</a>
+      </div>
+      <div class="right-item right-item--hero" data-hero="true">
+        <img src="../Desktop/Group%20233.svg" class="hero-eins" alt="eins">
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Wie kann Architektur Teil der Lösung sein, bevor sie Teil des Problems wird?</h2>
+        <a href="#" class="mehr">Mehr Erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Begleiten und Beraten</h2>
+        <a href="#" class="mehr">Mehr Erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Forschen und Entwickeln</h2>
+        <a href="#" class="mehr">Mehr Erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Planen und Bauen</h2>
+        <a href="#" class="mehr">Mehr Erfahren</a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="line"></div>
+    <span>Scroll</span>
+  </div>
+
+  <div class="counter" id="counter">
+    <span id="counter-text">01/06</span>
+    <svg id="auto-ring" width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0">
+      <circle cx="9" cy="9" r="7" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+      <circle id="auto-ring-arc" cx="9" cy="9" r="7" fill="none" stroke="#fff" stroke-width="1.5"
+        stroke-dasharray="43.98" stroke-dashoffset="43.98"
+        stroke-linecap="round" transform="rotate(-90 9 9)"/>
+    </svg>
+  </div>
+
+  <div class="colon-overlay" id="colonOverlay">
+    <img src="../Desktop/Punkte.svg" alt=":">
+  </div>
+
+  <script>
+    const rightPanel    = document.getElementById('rightPanel');
+    const leftPanel     = document.getElementById('leftPanel');
+    const colonOverlay  = document.getElementById('colonOverlay');
+    const arc           = document.getElementById('auto-ring-arc');
+    let prevIndex       = 0;
+
+    function restartRing() {
+      arc.style.animation = 'none';
+      arc.getBoundingClientRect();
+      arc.style.animation = '';
+    }
+
+    document.querySelectorAll('.mehr').forEach(el => {
+      el.addEventListener('mouseenter', () => { arc.style.animationPlayState = 'paused'; });
+      el.addEventListener('mouseleave', () => { arc.style.animationPlayState = 'running'; });
+    });
+
+    arc.addEventListener('animationend', () => {
+      const next = (prevIndex + 1) % total;
+      rightPanel.scrollTo({ top: next * rightPanel.clientHeight, behavior: 'smooth' });
+    });
+    const total         = rightPanel.querySelectorAll('.right-item').length;
+    const heroIndices   = [1, 5]; // 0-based indices of hero right-items
+
+    rightPanel.addEventListener('scroll', () => {
+      const scrollTop  = rightPanel.scrollTop;
+      const maxScroll  = rightPanel.scrollHeight - rightPanel.clientHeight;
+      const ratio      = scrollTop / maxScroll;
+
+      // Counter
+      const currentIndex = Math.round(ratio * (total - 1));
+
+      // Sync left panel — smooth slide, ganzzahlige Items
+      const leftCount = leftPanel.querySelectorAll('.left-item').length;
+      const leftIndex = Math.round(ratio * (leftCount - 1));
+      leftPanel.scrollLeft = leftIndex * (leftPanel.scrollWidth / leftCount);
+
+      document.getElementById('counter-text').textContent = String(currentIndex + 1).padStart(2, '0') + '/' + String(total).padStart(2, '0');
+
+      // Colon overlay — aktiv wenn hero slide sichtbar
+      colonOverlay.classList.toggle('active', heroIndices.includes(currentIndex));
+
+      if (currentIndex !== prevIndex) {
+        prevIndex = currentIndex;
+        restartRing();
+      }
+    });
+  </script>
+
+</body>
+</html>
