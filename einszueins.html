@@ -352,6 +352,32 @@
       align-items: center;
       gap: 14px;
     }
+    /* ─── LIGHT MODE ─── */
+    body.light { background: #fff; color: #000; }
+    body.light nav { mix-blend-mode: normal; }
+    body.light .nav-link { color: #000; }
+    body.light .nav-link::before { background: #000; }
+    body.light .right-item .mehr { color: #000; }
+    body.light .right-item .mehr::before { background: #000; }
+    body.light .counter { color: #000; }
+    body.light .scroll-indicator .line {
+      background: linear-gradient(to bottom, #000, #000) no-repeat top/1px 0%;
+    }
+    body.light #auto-ring circle { stroke: rgba(0,0,0,0.2); }
+    body.light #auto-ring-arc { stroke: #000; }
+    body.light .contrast-btn { color: #000; }
+
+    .contrast-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+      padding: 0;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+
     @keyframes ring-fill {
       from { stroke-dashoffset: 43.98; }
       to   { stroke-dashoffset: 0; }
@@ -365,6 +391,12 @@
 
   <nav>
     <a class="nav-link" href="#">Menü</a>
+    <button class="contrast-btn" id="contrastBtn" aria-label="Kontrast umschalten">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M10 1.5 A8.5 8.5 0 0 1 10 18.5 Z" fill="currentColor"/>
+      </svg>
+    </button>
   </nav>
 
   <div class="homescroll">
@@ -509,6 +541,10 @@
       arc.getBoundingClientRect();
       arc.style.animation = '';
     }
+
+    document.getElementById('contrastBtn').addEventListener('click', () => {
+      document.body.classList.toggle('light');
+    });
 
     document.querySelectorAll('.mehr').forEach(el => {
       el.addEventListener('mouseenter', () => { arc.style.animationPlayState = 'paused'; });
