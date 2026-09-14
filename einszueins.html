@@ -527,7 +527,6 @@
 
     arc.addEventListener('animationend', () => {
       rightPanel.scrollTo({ top: (prevIndex + 1) * rightPanel.clientHeight, behavior: 'smooth' });
-      setTimeout(doSilentReset, 700);
     });
 
     rightPanel.addEventListener('scrollend', doSilentReset);
@@ -537,10 +536,16 @@
       const scrollTop = rightPanel.scrollTop;
       const itemH     = rightPanel.clientHeight;
       const rawIndex  = Math.round(scrollTop / itemH);
+
+      // Silent reset sobald wir am Snap-Point in der Clone-Zone ankommen
+      if (rawIndex >= total && Math.abs(scrollTop - rawIndex * itemH) < 2) {
+        doSilentReset();
+        return;
+      }
+
       const dispIndex = rawIndex % total;
       const leftItemW = leftPanel.scrollWidth / (leftCount * 2);
-
-      leftPanel.scrollLeft = rawIndex * leftItemW;
+      leftPanel.scrollLeft = (rawIndex % leftCount) * leftItemW;
 
       document.getElementById('counter-text').textContent =
         String(dispIndex + 1).padStart(2, '0') + '/' + String(total).padStart(2, '0');
