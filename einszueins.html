@@ -491,7 +491,18 @@
     const leftPanel     = document.getElementById('leftPanel');
     const colonOverlay  = document.getElementById('colonOverlay');
     const arc           = document.getElementById('auto-ring-arc');
-    let prevIndex       = 0;
+
+    // Items klonen für seamless loop
+    Array.from(rightPanel.querySelectorAll('.right-item')).forEach(el =>
+      rightPanel.appendChild(el.cloneNode(true)));
+    Array.from(leftPanel.querySelectorAll('.left-item')).forEach(el =>
+      leftPanel.appendChild(el.cloneNode(true)));
+
+    const total       = rightPanel.querySelectorAll('.right-item').length / 2;
+    const leftCount   = leftPanel.querySelectorAll('.left-item').length / 2;
+    const heroIndices = [1, 6];
+    let prevIndex     = 0;
+    let isResetting   = false;
 
     function restartRing() {
       arc.style.animation = 'none';
@@ -504,33 +515,40 @@
       el.addEventListener('mouseleave', () => { arc.style.animationPlayState = 'running'; });
     });
 
+    function doSilentReset() {
+      const itemH = rightPanel.clientHeight;
+      if (rightPanel.scrollTop >= total * itemH) {
+        isResetting = true;
+        rightPanel.scrollTop -= total * itemH;
+        leftPanel.scrollLeft -= total * (leftPanel.scrollWidth / (leftCount * 2));
+        isResetting = false;
+      }
+    }
+
     arc.addEventListener('animationend', () => {
-      const next = (prevIndex + 1) % total;
-      rightPanel.scrollTo({ top: next * rightPanel.clientHeight, behavior: 'smooth' });
+      rightPanel.scrollTo({ top: (prevIndex + 1) * rightPanel.clientHeight, behavior: 'smooth' });
+      setTimeout(doSilentReset, 700);
     });
-    const total         = rightPanel.querySelectorAll('.right-item').length;
-    const heroIndices   = [1, 6]; // 0-based indices of hero right-items
+
+    rightPanel.addEventListener('scrollend', doSilentReset);
 
     rightPanel.addEventListener('scroll', () => {
-      const scrollTop  = rightPanel.scrollTop;
-      const maxScroll  = rightPanel.scrollHeight - rightPanel.clientHeight;
-      const ratio      = scrollTop / maxScroll;
+      if (isResetting) return;
+      const scrollTop = rightPanel.scrollTop;
+      const itemH     = rightPanel.clientHeight;
+      const rawIndex  = Math.round(scrollTop / itemH);
+      const dispIndex = rawIndex % total;
+      const leftItemW = leftPanel.scrollWidth / (leftCount * 2);
 
-      // Counter
-      const currentIndex = Math.round(ratio * (total - 1));
+      leftPanel.scrollLeft = rawIndex * leftItemW;
 
-      // Sync left panel — smooth slide, ganzzahlige Items
-      const leftCount = leftPanel.querySelectorAll('.left-item').length;
-      const leftIndex = Math.round(ratio * (leftCount - 1));
-      leftPanel.scrollLeft = leftIndex * (leftPanel.scrollWidth / leftCount);
+      document.getElementById('counter-text').textContent =
+        String(dispIndex + 1).padStart(2, '0') + '/' + String(total).padStart(2, '0');
 
-      document.getElementById('counter-text').textContent = String(currentIndex + 1).padStart(2, '0') + '/' + String(total).padStart(2, '0');
+      colonOverlay.classList.toggle('active', heroIndices.includes(dispIndex));
 
-      // Colon overlay — aktiv wenn hero slide sichtbar
-      colonOverlay.classList.toggle('active', heroIndices.includes(currentIndex));
-
-      if (currentIndex !== prevIndex) {
-        prevIndex = currentIndex;
+      if (rawIndex !== prevIndex) {
+        prevIndex = rawIndex;
         restartRing();
       }
     });
