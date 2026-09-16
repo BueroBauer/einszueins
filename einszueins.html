@@ -11,6 +11,12 @@
       font-weight: normal;
       font-style: normal;
     }
+    @font-face {
+      font-family: 'ApercuPro Mono';
+      src: url('ApercuPro-Mono.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -30,35 +36,22 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 40px 24px 0;
+      padding: 20px 40px 20px 0;
       z-index: 200;
       mix-blend-mode: difference;
-    }
-
-    .nav-logo {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
     }
 
     .nav-link {
       color: #fff;
       text-decoration: none;
-      font-size: 24px;
-      letter-spacing: 0.05em;
-      display: flex;
-      align-items: center;
+      font-family: 'ApercuPro Mono', monospace;
+      font-size: 14px;
+      letter-spacing: 0.02em;
     }
-    .nav-link::before {
-      content: '';
-      display: block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #fff;
-      flex-shrink: 0;
-      margin-right: 12px;
+
+    .nav-right {
+      display: flex;
+      gap: 32px;
     }
 
     /* ─── OUTER WRAPPER ─── */
@@ -356,7 +349,6 @@
     body.light { background: #F7F5F2; color: #000; }
     body.light nav { mix-blend-mode: normal; }
     body.light .nav-link { color: #000; }
-    body.light .nav-link::before { background: #000; }
     body.light .right-item .mehr { color: #000; }
     body.light .right-item .mehr::before { background: #000; }
     body.light .counter { color: #000; }
@@ -365,20 +357,9 @@
     }
     body.light #auto-ring circle { stroke: rgba(0,0,0,0.2); }
     body.light #auto-ring-arc { stroke: #000; }
-    body.light .contrast-btn { color: #000; }
     body.light .hero-eins { filter: invert(1); }
     body.light .colon-overlay img { filter: invert(1); }
 
-    .contrast-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #fff;
-      padding: 0;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-    }
 
     @keyframes ring-fill {
       from { stroke-dashoffset: 43.98; }
@@ -392,13 +373,11 @@
 <body>
 
   <nav>
-    <a class="nav-link" href="#">Menü</a>
-    <button class="contrast-btn" id="contrastBtn" aria-label="Kontrast umschalten">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M10 1.5 A8.5 8.5 0 0 1 10 18.5 Z" fill="currentColor"/>
-      </svg>
-    </button>
+    <a class="nav-link" href="#">[ ] projekte</a>
+    <div class="nav-right">
+      <a class="nav-link" href="#">[ ] büro</a>
+      <a class="nav-link" href="#">[ ] kontakt</a>
+    </div>
   </nav>
 
   <div class="homescroll">
@@ -543,10 +522,6 @@
       arc.getBoundingClientRect();
       arc.style.animation = '';
     }
-
-    document.getElementById('contrastBtn').addEventListener('click', () => {
-      document.body.classList.toggle('light');
-    });
 
     document.querySelectorAll('.mehr').forEach(el => {
       el.addEventListener('mouseenter', () => { arc.style.animationPlayState = 'paused'; });
