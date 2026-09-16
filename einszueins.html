@@ -54,13 +54,15 @@
       display: inline-block;
     }
     .nav-link .bkt::after {
-      content: '·';
+      content: '';
       position: absolute;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 36px;
-      line-height: 1;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: currentColor;
       opacity: 0;
     }
     .nav-link:hover .bkt::after {
