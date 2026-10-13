@@ -446,19 +446,19 @@
       }
 
       /* Hero: eins oben im Bild, eins unten im Textbereich, Doppelpunkt dazwischen */
+      /* Logo-Slide: zwei "eins" gespiegelt um die Trennlinie, Punkte waagrecht auf der Linie */
       .right-item--hero {
-        padding: var(--img-h) 0 0;
+        padding: var(--img-h) 0 calc(100vh - 2 * var(--img-h));
         justify-content: center; align-items: center;
       }
       .hero-eins,
       .left-item--hero .img-fill img.hero-eins {
-        height: 15vh; width: auto; max-width: 70%;
+        width: min(85vw, 560px); height: auto; max-width: none;
       }
-      @supports (height: 100dvh) {
-        .hero-eins, .left-item--hero .img-fill img.hero-eins { height: 15dvh; }
-      }
+      .left-item--hero .img-fill img.hero-eins { transform: rotate(180deg); }
       .colon-overlay { left: 50%; top: var(--img-h); }
-      .colon-overlay img { height: 7vh; transform: rotate(90deg); }
+      .colon-overlay img { height: min(27vw, 180px); width: auto; transform: rotate(90deg); }
+      @supports (height: 100dvh) { .right-item--hero { padding-bottom: calc(100dvh - 2 * var(--img-h)); } }
 
       /* Counter sitzt rechts unten im Bild */
       .counter {
