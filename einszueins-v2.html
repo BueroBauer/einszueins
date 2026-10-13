@@ -544,6 +544,10 @@
 
     <!-- LEFT: horizontal scroll panel -->
     <div class="left" id="leftPanel">
+      <div class="left-item">
+        <div class="img-fill"><img src="img/033-20260620-PNL_7044-607-Laubengangfest-Luiza%20Puiu.jpg" alt=""></div>
+        <div class="num">01</div>
+      </div>
 
       <div class="left-item left-item--hero">
         <div class="img-fill" style="background-image:url('img/005-20260727-DSC_9162-799-Gerhild-LeLac-Luiza%20Puiu.jpg'); background-size:cover; background-position:center; justify-content:center;">
@@ -590,6 +594,10 @@
 
     <!-- RIGHT: vertical scroll panel -->
     <div class="right" id="rightPanel">
+      <div class="right-item">
+        <h2 class="lead-question">Wie kann Planen und Bauen innerhalb der planetaren Grenzen gelingen?</h2>
+        <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-741&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1" class="mehr">Mehr erfahren</a>
+      </div>
 
       <div class="right-item right-item--hero" data-hero="true">
         <img src="img/Group 233.svg" class="hero-eins" alt="eins">
@@ -670,7 +678,7 @@
 
     const total       = rightPanel.querySelectorAll('.right-item').length / 2;
     const leftCount   = leftPanel.querySelectorAll('.left-item').length / 2;
-    const heroIndices = [0, 5];
+    const heroIndices = [1, 6];
     let prevIndex     = 0;
     let isResetting   = false;
 
