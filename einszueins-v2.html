@@ -469,7 +469,14 @@
       }
       .left-item--hero .img-fill img.hero-eins { transform: rotate(180deg); }
       .colon-overlay { left: 50%; top: var(--img-h); }
-      .colon-overlay img { height: min(27vw, 180px); width: auto; transform: rotate(90deg); }
+      /* Punkte als CSS-Kreise: gleiche Größe wie Punkte.svg, Abstand +5px */
+      .colon-overlay { --h: min(27vw, 180px); display: flex; gap: calc(var(--h) * 0.371 + 5px); }
+      .colon-overlay img { display: none; }
+      .colon-overlay::before, .colon-overlay::after {
+        content: ''; display: block; border-radius: 50%; background: #fff;
+        width: calc(var(--h) * 0.3145); height: calc(var(--h) * 0.3145);
+      }
+      body.light .colon-overlay::before, body.light .colon-overlay::after { background: #000; }
       @supports (height: 100dvh) { .right-item--hero { padding-bottom: calc(100dvh - 2 * var(--img-h)); } }
 
       /* Counter sitzt rechts unten im Bild */
