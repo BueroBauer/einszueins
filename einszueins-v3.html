@@ -488,12 +488,12 @@
 
       /* Counter sitzt rechts unten im Bild */
       .counter {
-        left: auto; right: 16px;
+        left: auto; right: var(--pad);
         bottom: auto; top: calc(var(--img-h) - 32px);
         font-size: 11px; gap: 8px;
       }
       .scroll-indicator {
-        right: 16px;
+        right: var(--pad);
         bottom: calc(env(safe-area-inset-bottom) + 48px);
       }
     }
