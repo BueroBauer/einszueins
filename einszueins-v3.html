@@ -398,7 +398,7 @@
 
     /* Stacked: Phones + Tablets hochkant. Bild oben, Text unten */
     @media (max-width: 767px), (max-width: 1023px) and (orientation: portrait) {
-      :root { --img-h: 38.4vh; --pad: 24px; }
+      :root { --img-h: 38.4vh; --pad: 19px; }
       @supports (height: 100dvh) { :root { --img-h: 38.4dvh; } }
 
       nav {
@@ -499,7 +499,7 @@
     }
 
     @media (max-width: 374px) {
-      :root { --pad: 16px; }
+      :root { --pad: 11px; }
       .nav-link { font-size: 12px; }
       .nav-right { gap: 10px; }
       .right-item h2 { font-size: 24px; }
@@ -507,7 +507,7 @@
 
     /* Tablet hochkant: mehr Luft, größere Schrift */
     @media (min-width: 600px) and (max-width: 1023px) and (orientation: portrait) {
-      :root { --pad: 48px; }
+      :root { --pad: 43px; }
       .nav-link { font-size: 16px; }
       .right-item h2 { font-size: clamp(36px, 6vw, 56px); max-width: 20ch; }
       .right-item .mehr { font-size: 18px; }
