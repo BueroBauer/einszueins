@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>einszueins</title>
+  <style>
+    @font-face {
+      font-family: 'ApercuPro';
+      src: url('ApercuPro.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'ApercuPro Mono';
+      src: url('ApercuPro-Mono.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'ApercuPro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: calc(50% + 20px);
+      width: calc(50% - 20px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px 20px 0;
+      z-index: 200;
+      mix-blend-mode: difference;
+    }
+
+    .nav-link {
+      color: #fff;
+      text-decoration: none;
+      font-family: 'ApercuPro Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-link .bkt {
+      position: relative;
+      display: inline-block;
+    }
+    .nav-link .bkt::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0;
+    }
+    .nav-link:hover .bkt::after {
+      opacity: 1;
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 32px;
+    }
+
+    /* ─── OUTER WRAPPER ─── */
+    .homescroll {
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ─── DIVIDER LINE ─── */
+    .divider {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      width: 1px;
+      height: 100vh;
+      background: rgba(255,255,255,0.2);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    /* ─── RIGHT PANEL — vertical scroll, content in right half ─── */
+    .right {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100%;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .right::-webkit-scrollbar { display: none; }
+
+    .right-item {
+      height: 100vh;
+      width: 100%;
+      padding-left: calc(50% + 20px);
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 40px;
+    }
+
+    .right-item .label {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.4;
+      margin-bottom: 12px;
+    }
+
+    .right-item h2 {
+      font-size: clamp(22px, 3.2vw, 52px);
+      font-weight: 400;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .right-item .mehr {
+      display: flex;
+      align-items: center;
+      font-family: 'ApercuPro Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      margin-top: clamp(6px, 0.8vw, 13px);
+      color: #fff;
+      text-decoration: none;
+    }
+    .right-item .mehr::before {
+      content: '';
+      display: block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      flex-shrink: 0;
+      opacity: 0;
+      max-width: 0;
+      margin-right: 0;
+      overflow: hidden;
+      transition: max-width 0.3s ease, margin-right 0.3s ease, opacity 0.2s ease;
+    }
+
+    .right-item p {
+      font-size: 13px;
+      line-height: 1.7;
+      opacity: 0.55;
+      max-width: 340px;
+    }
+
+    .right-item .tags {
+      margin-top: 20px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 4px 10px;
+      border-radius: 2px;
+      opacity: 0.6;
+    }
+
+    /* ─── LEFT PANEL — horizontal scroll, overlaid ─── */
+    .left {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(50vw);
+      height: 100vh;
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      pointer-events: none;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+
+    .left::-webkit-scrollbar { display: none; }
+
+    .left-item {
+      width: 50vw;
+      height: 100vh;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Placeholder image blocks mit farbigen Flächen */
+    .left-item .img-fill {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .left-item .img-fill span {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.3;
+    }
+
+    .left-item .img-fill img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* individuelle Hintergrundfarben pro Slide */
+    .left-item:nth-child(1)  .img-fill { background: #1a1a2e; }
+    .left-item:nth-child(2)  .img-fill { background: #16213e; }
+    .left-item:nth-child(3)  .img-fill { background: #0f3460; }
+    .left-item:nth-child(4)  .img-fill { background: #1b2838; }
+    .left-item:nth-child(5)  .img-fill { background: #1c1c1c; }
+    .left-item:nth-child(6)  .img-fill { background: #2d1b33; }
+    .left-item:nth-child(7)  .img-fill { background: #0d1b2a; }
+    .left-item:nth-child(8)  .img-fill { background: #1e2d40; }
+    .left-item:nth-child(9)  .img-fill { background: #12202c; }
+    .left-item:nth-child(10) .img-fill { background: #1a1a1a; }
+    .left-item:nth-child(11) .img-fill { background: #231f20; }
+    .left-item:nth-child(12) .img-fill { background: #111827; }
+    .left-item:nth-child(13) .img-fill { background: #0e1a2b; }
+    .left-item:nth-child(14) .img-fill { background: #1c2333; }
+    .left-item:nth-child(15) .img-fill { background: #18202c; }
+    .left-item:nth-child(16) .img-fill { background: #14213d; }
+    .left-item:nth-child(17) .img-fill { background: #1d2d44; }
+    .left-item:nth-child(18) .img-fill { background: #0c1a26; }
+    .left-item:nth-child(19) .img-fill { background: #1b1f2e; }
+    .left-item:nth-child(20) .img-fill { background: #22293a; }
+
+    .left-item .num { display: none; }
+
+    /* ─── HERO SLIDE ─── */
+    .right-item--hero {
+      padding-left: 50%;
+      padding-right: 0;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-eins {
+      height: clamp(60px, 26.4vh, 38vw);
+      width: auto;
+      max-width: 80%;
+      display: block;
+    }
+
+    /* linkes hero-item: eins mittig in linker Hälfte */
+    .left-item--hero .img-fill {
+      align-items: center;
+      justify-content: center;
+    }
+
+    .left-item--hero .img-fill img.hero-eins {
+      height: clamp(60px, 26.4vh, 38vw);
+      width: auto;
+      max-width: 80%;
+      object-fit: unset;
+    }
+
+    /* Doppelpunkt Overlay */
+    .colon-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 150;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .colon-overlay.active {
+      opacity: 1;
+    }
+
+    .colon-overlay img {
+      height: clamp(48px, 20.8vh, 30vw);
+      width: auto;
+      display: block;
+    }
+
+    /* ─── SCROLL INDICATOR ─── */
+    .scroll-indicator {
+      position: fixed;
+      bottom: 32px;
+      right: 40px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 1;
+    }
+
+    .scroll-indicator span {
+      font-family: 'ApercuPro Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+    }
+
+    .scroll-indicator .line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, #fff, #fff) no-repeat top/1px 0%;
+      animation: scrollGrow 2.6s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .right-item .mehr:hover::before {
+      opacity: 1;
+      max-width: 10px;
+      margin-right: 12px;
+      animation: blink 0.8s ease-in-out infinite;
+    }
+
+    @keyframes scrollGrow {
+      0%   { background-size: 1px 0%; }
+      80%  { background-size: 1px 100%; }
+      100% { background-size: 1px 100%; }
+    }
+
+    /* ─── COUNTER ─── */
+    .counter {
+      position: fixed;
+      bottom: 32px;
+      left: 40px;
+      z-index: 200;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: #fff;
+      opacity: 1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    /* ─── LIGHT MODE ─── */
+    body.light { background: #F7F5F2; color: #000; }
+    body.light nav { mix-blend-mode: normal; }
+    body.light .nav-link { color: #000; }
+    body.light .right-item .mehr { color: #000; }
+    body.light .right-item .mehr::before { background: #000; }
+    body.light .counter { color: #000; }
+    body.light .scroll-indicator .line {
+      background: linear-gradient(to bottom, #000, #000) no-repeat top/1px 0%;
+    }
+    body.light #auto-ring circle { stroke: rgba(0,0,0,0.2); }
+    body.light #auto-ring-arc { stroke: #000; }
+    body.light .hero-eins { filter: invert(1); }
+    body.light .colon-overlay img { filter: invert(1); }
+
+
+    @keyframes ring-fill {
+      from { stroke-dashoffset: 43.98; }
+      to   { stroke-dashoffset: 0; }
+    }
+    #auto-ring-arc {
+      animation: ring-fill 5s linear forwards;
+    }
+
+    /* ═══ V2 RESPONSIVE ═══ */
+    @supports (height: 100dvh) {
+      body, .homescroll, .right, .right-item, .left, .left-item, .divider { height: 100dvh; }
+    }
+
+    /* Stacked: Phones + Tablets hochkant. Bild oben, Text unten */
+    @media (max-width: 767px), (max-width: 1023px) and (orientation: portrait) {
+      :root { --img-h: 38.4vh; --pad: 24px; }
+      @supports (height: 100dvh) { :root { --img-h: 38.4dvh; } }
+
+      nav {
+        left: 0; width: 100%;
+        padding: calc(env(safe-area-inset-top) + 4px) var(--pad) 0 var(--pad);
+      }
+      nav { mix-blend-mode: normal; }
+      .nav-link { text-shadow: 0 0 12px rgba(0,0,0,0.35); }
+      .nav-link {
+        font-size: 14px;
+        display: inline-flex; align-items: center;
+        min-height: 44px;
+      }
+      .nav-right { gap: 16px; }
+      .nav-link .bkt { margin-right: 0.3em; }
+
+      .divider {
+        left: 0; top: var(--img-h);
+        width: 100%; height: 1px;
+      }
+
+      /* Beide Panels laufen horizontal, gegenläufig: Text nach links, Bild nach rechts */
+      .left {
+        width: 100vw; height: var(--img-h);
+        flex-direction: row-reverse;
+        scroll-behavior: auto;
+      }
+      .left-item { width: 100vw; height: var(--img-h); }
+      /* Header-Bild: 20% schwarzer Overlay (nicht auf Logo-Slides) */
+      .left-item:not(.left-item--hero) .img-fill { position: relative; }
+      .left-item:not(.left-item--hero) .img-fill::after {
+        content: ''; position: absolute; inset: 0;
+        background: rgba(0,0,0,.2); pointer-events: none;
+      }
+      .right {
+        display: flex; flex-direction: row;
+        overflow-x: scroll; overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior: none;
+        touch-action: none;   /* Wisch läuft komplett über JS: ein Wisch = ein Slide */
+      }
+      .right-item { width: 100vw; flex: 0 0 100vw; }
+
+      .right-item {
+        padding: calc(var(--img-h) + 52px) var(--pad) 96px;
+        justify-content: flex-start;
+      }
+      .right-item h2 {
+        font-size: clamp(28px, 9vw, 52px);
+        line-height: 1.1;
+        max-width: 9.2em;
+        margin-bottom: 12px;
+      }
+      .right-item .mehr {
+        font-family: 'ApercuPro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 17px;
+        letter-spacing: 0;
+        min-height: 44px;
+        margin-top: 8px;
+      }
+      /* Touch: Punkt dauerhaft zeigen, kein Hover nötig */
+      .right-item .mehr::before {
+        opacity: 1; max-width: 10px; margin-right: 12px;
+      }
+
+      /* Hero: eins oben im Bild, eins unten im Textbereich, Doppelpunkt dazwischen */
+      /* Logo-Slide: zwei "eins" gespiegelt um die Trennlinie, Punkte waagrecht auf der Linie */
+      .right-item--hero {
+        padding: var(--img-h) 0 calc(100vh - 2 * var(--img-h));
+        justify-content: center; align-items: center;
+      }
+      .hero-eins,
+      .left-item--hero .img-fill img.hero-eins {
+        width: min(85vw, 560px); height: auto; max-width: none;
+      }
+      .left-item--hero .img-fill img.hero-eins { transform: rotate(180deg); }
+      .colon-overlay { left: 50%; top: var(--img-h); }
+      /* Punkte als CSS-Kreise: gleiche Größe wie Punkte.svg, Abstand +5px */
+      .colon-overlay { --h: min(27vw, 180px); display: flex; gap: calc(var(--h) * 0.371 + 10px); }
+      .colon-overlay img { display: none; }
+      .colon-overlay::before, .colon-overlay::after {
+        content: ''; display: block; border-radius: 50%; background: #fff;
+        width: calc(var(--h) * 0.3145); height: calc(var(--h) * 0.3145);
+      }
+      body.light .colon-overlay::before, body.light .colon-overlay::after { background: #000; }
+      @supports (height: 100dvh) { .right-item--hero { padding-bottom: calc(100dvh - 2 * var(--img-h)); } }
+
+      /* Counter sitzt rechts unten im Bild */
+      .counter {
+        left: auto; right: 16px;
+        bottom: auto; top: calc(var(--img-h) - 32px);
+        font-size: 11px; gap: 8px;
+      }
+      .scroll-indicator {
+        right: 16px;
+        bottom: calc(env(safe-area-inset-bottom) + 48px);
+      }
+    }
+
+    @media (max-width: 374px) {
+      :root { --pad: 16px; }
+      .nav-link { font-size: 12px; }
+      .nav-right { gap: 10px; }
+      .right-item h2 { font-size: 24px; }
+    }
+
+    /* Tablet hochkant: mehr Luft, größere Schrift */
+    @media (min-width: 600px) and (max-width: 1023px) and (orientation: portrait) {
+      :root { --pad: 48px; }
+      .nav-link { font-size: 16px; }
+      .right-item h2 { font-size: clamp(36px, 6vw, 56px); max-width: 20ch; }
+      .right-item .mehr { font-size: 18px; }
+    }
+
+    /* Phone quer: Desktop-Aufteilung, aber kompakt */
+    @media (max-height: 500px) and (orientation: landscape) {
+      nav { padding: 8px 24px 8px 0; }
+      .nav-link { font-size: 13px; }
+      .right-item { padding-right: 24px; }
+      .right-item h2 { font-size: clamp(18px, 3.4vw, 28px); margin-bottom: 8px; }
+      .right-item .mehr { font-size: 14px; min-height: 44px; }
+      .counter { left: 24px; bottom: 16px; }
+      .scroll-indicator { right: 24px; bottom: 12px; }
+      .scroll-indicator .line { height: 24px; }
+    }
+
+    /* Hover-Dot nur wo Hover existiert */
+    @media (hover: none) {
+      .nav-link:hover .bkt::after { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-indicator .line, .right-item .mehr:hover::before { animation: none; }
+    }
+  
+    /* ═══ V3 MENÜ ═══ */
+    .wordmark, .menu-overlay { display: none; }
+    @media (max-width: 767px), (max-width: 1023px) and (orientation: portrait) {
+      nav { display: none; }
+      .wordmark {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 400;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: calc(env(safe-area-inset-top) + 4px) var(--pad) 0;
+        color: #fff; pointer-events: none;
+        font-family: 'ApercuPro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 30px; line-height: 44px;
+        text-shadow: 0 0 12px rgba(0,0,0,0.35);
+      }
+      body.light .wordmark { color: #000; }
+      .wm-colon {
+        pointer-events: auto; position: absolute; left: 50%; top: calc(env(safe-area-inset-top) + 4px);
+        transform: translateX(-50%);
+        color: inherit; width: 44px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .wm-colon i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block; }
+      .menu-overlay {
+        position: fixed; inset: 0; z-index: 300;
+        display: flex; flex-direction: column; justify-content: center; gap: 8px;
+        padding: 0 var(--pad);
+        background: rgba(0,0,0,0.94);
+        opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s;
+      }
+      .menu-overlay.open { opacity: 1; visibility: visible; }
+      .menu-overlay a {
+        color: #fff; text-decoration: none; min-height: 44px;
+        font-family: 'ApercuPro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: clamp(40px, 12vw, 72px); line-height: 1.15;
+      }
+      body.menu-open .wordmark { color: #fff; text-shadow: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { .menu-overlay { transition: none; } }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-link" href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-611&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1"><span class="bkt">[ ]</span> projekte</a>
+    <div class="nav-right">
+      <a class="nav-link" href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-1000&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1"><span class="bkt">[ ]</span> büro</a>
+      <a class="nav-link" href="#"><span class="bkt">[ ]</span> kontakt</a>
+    </div>
+  </nav>
+
+  <!-- v3 mobil: Wortmarke eins : eins, Doppelpunkt = Menü-Button -->
+  <header class="wordmark">
+    <span class="wm-eins">eins</span>
+    <button class="wm-colon" id="menuBtn" type="button" aria-label="Menü" aria-expanded="false" aria-controls="menuOverlay"><i></i><i></i></button>
+    <span class="wm-eins">eins</span>
+  </header>
+  <div class="menu-overlay" id="menuOverlay" aria-hidden="true">
+    <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-611&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1">projekte</a>
+    <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-1000&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1">büro</a>
+    <a href="#">kontakt</a>
+  </div>
+
+  <div class="homescroll">
+
+    <div class="divider"></div>
+
+    <!-- LEFT: horizontal scroll panel -->
+    <div class="left" id="leftPanel">
+      <div class="left-item">
+        <div class="img-fill"><img src="img/033-20260620-PNL_7044-607-Laubengangfest-Luiza%20Puiu.jpg" alt=""></div>
+        <div class="num">01</div>
+      </div>
+
+      <div class="left-item left-item--hero">
+        <div class="img-fill" style="background-image:url('img/005-20260727-DSC_9162-799-Gerhild-LeLac-Luiza%20Puiu.jpg'); background-size:cover; background-position:center; justify-content:center;">
+          <img src="img/Group 233.svg" class="hero-eins" alt="eins">
+        </div>
+      </div>
+
+
+      <div class="left-item">
+        <div class="img-fill"><img src="img/201907050806-0011-PNL_6854-Philipp%20Naderer-Puiu.jpg" alt=""></div>
+        <div class="num">02</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="img/07_Platten%20auf%20LKW.jpg" alt=""></div>
+        <div class="num">03</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="img/046-20260621-DSC_4368-411-Gleis%2021-Luiza%20Puiu.jpg" alt=""></div>
+        <div class="num">04</div>
+      </div>
+      <div class="left-item left-item--hero">
+        <div class="img-fill" style="background-image:url('img/017-20260629-PNL_8057-240-Vis%20a%20Wien-Luiza%20Puiu.jpg'); background-size:cover; background-position:center; justify-content:center;">
+          <img src="img/Group 233.svg" class="hero-eins" alt="eins">
+        </div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="img/Auenweide_DSC6047_33_38_exp_A4.jpg" alt=""></div>
+        <div class="num">14</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="img/IMG_3101.jpg" alt=""></div>
+        <div class="num">15</div>
+      </div>
+      <div class="left-item">
+        <div class="img-fill"><img src="img/Gleis21_DSC5043_exp_A4.jpg" alt=""></div>
+        <div class="num">16</div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: vertical scroll panel -->
+    <div class="right" id="rightPanel">
+      <div class="right-item">
+        <h2 class="lead-question">Wie kann Planen und Bauen innerhalb der planetaren Grenzen gelingen?</h2>
+        <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-741&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1" class="mehr">Mehr erfahren</a>
+      </div>
+
+      <div class="right-item right-item--hero" data-hero="true">
+        <img src="img/Group 233.svg" class="hero-eins" alt="eins">
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Begleiten und Beraten</h2>
+        <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-1101&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1" class="mehr">Mehr erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Forschen und Entwickeln</h2>
+        <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-1101&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1" class="mehr">Mehr erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Planen und Bauen</h2>
+        <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-1101&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1" class="mehr">Mehr erfahren</a>
+      </div>
+      <div class="right-item right-item--hero" data-hero="true">
+        <img src="img/Group 233.svg" class="hero-eins" alt="eins">
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Begleiten und Beraten</h2>
+        <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-1101&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1" class="mehr">Mehr erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Forschen und Entwickeln</h2>
+        <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-1101&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1" class="mehr">Mehr erfahren</a>
+      </div>
+      <div class="right-item">
+        <h2 class="lead-question">Planen und Bauen</h2>
+        <a href="https://www.figma.com/proto/uURc4DHCefWhT5PkBIHZNK/einszueins_prototype?node-id=3-1101&p=f&t=RJwwh2xj6WHzHU4a-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=3%3A611&hide-ui=1" class="mehr">Mehr erfahren</a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="line"></div>
+    <span>Scroll</span>
+  </div>
+
+  <div class="counter" id="counter">
+    <span id="counter-text">01/09</span>
+    <svg id="auto-ring" width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0">
+      <circle cx="9" cy="9" r="7" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+      <circle id="auto-ring-arc" cx="9" cy="9" r="7" fill="none" stroke="#fff" stroke-width="1.5"
+        stroke-dasharray="43.98" stroke-dashoffset="43.98"
+        stroke-linecap="round" transform="rotate(-90 9 9)"/>
+    </svg>
+  </div>
+
+  <div class="colon-overlay" id="colonOverlay">
+    <img src="img/Punkte.svg" alt=":">
+  </div>
+
+  <script>
+    const rightPanel    = document.getElementById('rightPanel');
+    const leftPanel     = document.getElementById('leftPanel');
+    const colonOverlay  = document.getElementById('colonOverlay');
+    const arc           = document.getElementById('auto-ring-arc');
+
+    // Items klonen für seamless loop
+    Array.from(rightPanel.querySelectorAll('.right-item')).forEach(el =>
+      rightPanel.appendChild(el.cloneNode(true)));
+    Array.from(leftPanel.querySelectorAll('.left-item')).forEach(el =>
+      leftPanel.appendChild(el.cloneNode(true)));
+
+    const stackedMQ = window.matchMedia('(max-width: 767px), (max-width: 1023px) and (orientation: portrait)');
+    const stacked   = () => stackedMQ.matches;
+    const pos       = () => stacked() ? rightPanel.scrollLeft : rightPanel.scrollTop;
+    const unit      = () => stacked() ? rightPanel.clientWidth : rightPanel.clientHeight;
+    const setPos    = v => { if (stacked()) rightPanel.scrollLeft = v; else rightPanel.scrollTop = v; };
+    const goTo      = v => rightPanel.scrollTo(stacked() ? { left: v, behavior: 'smooth' } : { top: v, behavior: 'smooth' });
+
+    const total       = rightPanel.querySelectorAll('.right-item').length / 2;
+    const leftCount   = leftPanel.querySelectorAll('.left-item').length / 2;
+    const heroIndices = [1, 5];
+    let prevIndex     = 0;
+    let isResetting   = false;
+
+    function restartRing() {
+      arc.style.animation = 'none';
+      arc.getBoundingClientRect();
+      arc.style.animation = '';
+    }
+
+    document.querySelectorAll('.mehr').forEach(el => {
+      el.addEventListener('mouseenter', () => { arc.style.animationPlayState = 'paused'; });
+      el.addEventListener('mouseleave', () => { arc.style.animationPlayState = 'running'; });
+    });
+
+    function doSilentReset() {
+      const itemH = unit();
+      if (pos() >= total * itemH) {
+        isResetting = true;
+        setPos(pos() - total * itemH);
+        if (!stacked()) leftPanel.scrollLeft -= total * (leftPanel.scrollWidth / (leftCount * 2));
+        isResetting = false;
+      }
+    }
+
+    arc.addEventListener('animationend', () => { goTo((prevIndex + 1) * unit()); });
+
+    stackedMQ.addEventListener('change', () => {
+      rightPanel.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      leftPanel.scrollTo({ left: 0, behavior: 'instant' });
+      prevIndex = 0;
+    });
+
+    // Mobil: vertikale Gesten und Mausrad schalten ebenfalls einen Slide weiter
+    let stepLock = false;
+    function step(dir) {
+      if (stepLock) return;
+      stepLock = true;
+      const i = Math.round(pos() / unit());
+      goTo(Math.max(0, i + dir) * unit());
+      setTimeout(() => { stepLock = false; }, 600);
+    }
+    rightPanel.addEventListener('wheel', e => {
+      if (!stacked() || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      if (Math.abs(e.deltaY) > 4) step(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+    let tx = 0, ty = 0;
+    rightPanel.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+    rightPanel.addEventListener('touchend', e => {
+      if (!stacked()) return;
+      const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+      const d = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (Math.abs(d) > 30) step(d < 0 ? 1 : -1);
+    }, { passive: true });
+
+    rightPanel.addEventListener('scrollend', doSilentReset);
+
+    rightPanel.addEventListener('scroll', () => {
+      if (isResetting) return;
+      const scrollTop = pos();
+      const itemH     = unit();
+      const rawIndex  = Math.round(scrollTop / itemH);
+
+      // Silent reset sobald wir am Snap-Point in der Clone-Zone ankommen
+      if (rawIndex >= total && Math.abs(scrollTop - rawIndex * itemH) < 2) {
+        doSilentReset();
+        return;
+      }
+
+      const dispIndex = rawIndex % total;
+      const leftItemW = leftPanel.scrollWidth / (leftCount * 2);
+      if (stacked()) {
+        // gegenläufig + kontinuierlich: Bild gleitet mit dem Wisch
+        leftPanel.scrollLeft = -((scrollTop / itemH) % leftCount) * leftItemW;
+      } else {
+        leftPanel.scrollLeft = (rawIndex % leftCount) * leftItemW;
+      }
+
+      document.getElementById('counter-text').textContent =
+        String(dispIndex + 1).padStart(2, '0') + '/' + String(total).padStart(2, '0');
+
+      colonOverlay.classList.toggle('active', heroIndices.includes(dispIndex));
+
+      if (rawIndex !== prevIndex) {
+        prevIndex = rawIndex;
+        restartRing();
+      }
+    });
+    rightPanel.dispatchEvent(new Event('scroll'));
+  
+    // v3 Menü
+    (function(){
+      const btn=document.getElementById('menuBtn'), ov=document.getElementById('menuOverlay');
+      function set(o){ ov.classList.toggle('open',o); document.body.classList.toggle('menu-open',o);
+        btn.setAttribute('aria-expanded',o); ov.setAttribute('aria-hidden',!o); }
+      btn.addEventListener('click',()=>set(!ov.classList.contains('open')));
+      ov.addEventListener('click',e=>{ if(e.target.closest('a')) set(false); });
+      document.addEventListener('keydown',e=>{ if(e.key==='Escape') set(false); });
+    })();
+</script>
+
+</body>
+</html>
