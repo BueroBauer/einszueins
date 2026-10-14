@@ -427,9 +427,9 @@
         scroll-behavior: auto;
       }
       .left-item { width: 100vw; height: var(--img-h); }
-      /* Header-Bild: 20% schwarzer Overlay (nicht auf Logo-Slides) */
-      .left-item:not(.left-item--hero) .img-fill { position: relative; }
-      .left-item:not(.left-item--hero) .img-fill::after {
+      /* Header-Bild: 20% schwarzer Overlay auf allen Slides */
+      .left-item .img-fill { position: relative; }
+      .left-item .img-fill::after {
         content: ''; position: absolute; inset: 0;
         background: rgba(0,0,0,.2); pointer-events: none;
       }
@@ -547,6 +547,7 @@
         text-shadow: 0 0 12px rgba(0,0,0,0.35);
       }
       body.light .wordmark { color: #000; }
+      body.on-hero .wordmark { opacity: 0; visibility: hidden; }
       .wm-colon {
         pointer-events: auto; position: absolute; left: 50%; top: calc(env(safe-area-inset-top) + 4px);
         transform: translateX(-50%);
@@ -810,6 +811,7 @@
         String(dispIndex + 1).padStart(2, '0') + '/' + String(total).padStart(2, '0');
 
       colonOverlay.classList.toggle('active', heroIndices.includes(dispIndex));
+      document.body.classList.toggle('on-hero', heroIndices.includes(dispIndex));
 
       if (rawIndex !== prevIndex) {
         prevIndex = rawIndex;
