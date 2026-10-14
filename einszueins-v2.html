@@ -428,11 +428,11 @@
       }
       .left-item { width: 100vw; height: var(--img-h); }
       /* Header-Bild: 20% schwarzer Overlay (nicht auf Logo-Slides) */
-      .left-item:not(.left-item--hero) .img-fill { position: relative; }
-      .left-item:not(.left-item--hero) .img-fill::after {
+            .left-item:not(.left-item--hero) .img-fill::after {
         content: ''; position: absolute; inset: 0;
         background: rgba(0,0,0,.2); pointer-events: none;
       }
+      .left-item:not(.left-item--hero) .img-fill img { position: relative; z-index: 1; }
       .right {
         display: flex; flex-direction: row;
         overflow-x: scroll; overflow-y: hidden;
