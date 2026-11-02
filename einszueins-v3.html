@@ -430,7 +430,7 @@
       /* Header-Bild: 20% schwarzer Overlay auf allen Slides */
       .left-item .img-fill::after {
         content: ''; position: absolute; inset: 0;
-        background: rgba(0,0,0,.2); pointer-events: none;
+        background: rgba(0,0,0,.2); pointer-events: none; z-index: 2;
       }
       .left-item .img-fill img { position: relative; z-index: 1; }
       .right {
