@@ -235,10 +235,15 @@
 
     .ft { display: flex; justify-content: flex-end; align-items: flex-end; padding: 60px 0 21px; font-size: 14px; text-transform: uppercase; line-height: 22px; }
     .ft .lk { display: flex; gap: 90px; }
-    .ft .ad { width: 358px; max-width: 100%; font-size: 13px; }
-    .ft .ad > div { display: flex; justify-content: space-between; align-items: center; height: 22px; white-space: nowrap; }
-    .ft .ad .gl { width: 38px; height: 30px; flex: none; }
-    .ft .ad i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #000; margin-right: 8px; vertical-align: -1px; }
+    .ft .ad { width: 100%; max-width: 362px; display: grid; grid-template-columns: 126px 1fr auto; grid-auto-rows: 24px; align-items: center; text-align: left; font-family: 'ApercuPro Mono', monospace; font-size: 16px; line-height: 24px; letter-spacing: .02em; white-space: nowrap; }
+    .ft .ad a { color: inherit; text-decoration: none; }
+    .ft .ad .r1 { grid-column: 1 / -1; display: flex; justify-content: space-between; }
+    .ft .ad svg { grid-row: 2 / 4; grid-column: 1; width: 38px; height: 34px; justify-self: start; }
+    .ft .ad .ln { grid-column: 2 / -1; margin-left: 2px; display: flex; align-items: center; gap: 5px; }
+    .ft .ad .ln i { width: 10px; height: 10px; box-sizing: border-box; border: 1px solid #000; border-radius: 50%; flex: none; }
+    .ft .ad .ln.sp span:last-child, .ft .ad .ln.rt a { margin-left: auto; }
+    .ft .ad .l4 { grid-column: 1 / 3; }
+    .ft .ad .r4 { grid-column: 3; justify-self: end; }
     .ft .ad a:hover { text-decoration: underline; }
 
     @media (max-width: 767px), (max-width: 1023px) and (orientation: portrait) {
@@ -268,7 +273,7 @@
       .it { order: var(--o); margin-bottom: 56px; }
       .gal { display: flex; flex-direction: column; }
       .ft { flex-direction: column; align-items: stretch; gap: 36px; padding-top: 60px; }
-      .ft .ad { width: 100%; max-width: 358px; align-self: flex-end; }
+      .ft .ad { width: 100%; max-width: 362px; align-self: flex-end; }
     }
     @media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) { .hdr .m.k { left: calc(66.6% + 100px); } }
     @media (prefers-reduced-motion: reduce) {
@@ -310,10 +315,11 @@
 <article class="it" style="--o:10"><img src="img/projekte/b4.jpg" width="930" height="622" alt="Auenweide" loading="lazy"><span class="t">Architektur</span><span class="n">Auenweide</span></article>
 <article class="it" style="--o:12"><img src="img/projekte/b5.jpg" width="930" height="620" alt="Wohnprojekt Wien" loading="lazy"><span class="t">Architektur</span><span class="n">Wohnprojekt Wien</span></article>
       <footer class="ft fl" style="--o:98"><div class="ad">
-        <div><span>Einszueins Architektur ZT</span><span>GmbH</span></div>
-        <div><svg class="gl" viewBox="0 0 38 30" fill="none" stroke="#000" stroke-width="1.2" aria-hidden="true"><ellipse cx="19" cy="15" rx="18" ry="14"/><ellipse cx="19" cy="15" rx="8" ry="14"/><path d="M1 15h36M4 7h30M4 23h30M19 1v28"/></svg><span><i></i>Krakauer Strase&nbsp;&nbsp;19/2</span></div>
-        <div><span></span><a href="mailto:office@einszueins.at"><i></i>office@einszueins.at</a></div>
-        <div><span>1020 Wien</span><span>Austria</span></div>
+        <div class="r1"><span>einszueins architektur zt</span><span>gmbh</span></div>
+        <svg viewBox="0 0 38 34" fill="none" stroke="#000" stroke-width="1" aria-hidden="true"><ellipse cx="19" cy="17" rx="18" ry="16"/><ellipse cx="19" cy="17" rx="8" ry="16"/><path d="M19 1v32M1 17h36M4 8c9 3 21 3 30 0M4 26c9-3 21-3 30 0"/></svg>
+        <div class="ln sp"><i></i><span>Krakauer Straße</span><span>19/2</span></div>
+        <div class="ln rt"><i></i><a href="mailto:office@einszueins.at">office@einszueins.at</a></div>
+        <span class="l4">1020 wien</span><span class="r4">Austria</span>
       </div></footer>
       </div>
       <div class="col r" id="colR">
@@ -466,8 +472,10 @@
     let vs = 0, vt = 0, raf = 0;                                                  // Scrollweg am Desktop (virtuell), mobil echtes scrollTop
     function geo() {
       const u = site.clientWidth / 1438, desk = deskMq.matches;
+      const d0 = Math.min(innerWidth * .024, innerHeight * .042), dots0 = Math.min(site.clientHeight / 2, 580 * u);
+      const dEnd = dots0 + d0 * 2.33 / 2 + d0 / 2, ftog0 = 602 * u - (602 * u - dEnd) / 2;   // halber Abstand Punkte zu Filter
       return desk
-        ? { desk, Hl: 185 * u, menu0: 215 * u, menuF: 30, dots0: Math.min(site.clientHeight / 2, 580 * u), dotsF: 39, d0: Math.min(innerWidth * .024, innerHeight * .042), sp0: Math.min(innerWidth * .024, innerHeight * .042) * 2.33, ftog0: 602 * u, ftogF: 90 }
+        ? { desk, Hl: 185 * u, menu0: 215 * u, menuF: 30, dots0, dotsF: 39, d0, sp0: d0 * 2.33, ftog0, ftogF: 90 }
         : { desk, Hl: 185 * u, menu0: 62, menuF: 62, dots0: 150, dotsF: 31, d0: 22, sp0: 48, ftog0: 215, ftogF: 100 };
     }
     function render() {
@@ -499,6 +507,11 @@
       const D = geo().ftog0 - geo().ftogF, hov = e.target.closest && e.target.closest('.col');
       const push = d => { vt = Math.max(0, Math.min(D, vt + d)); if (!raf) raf = requestAnimationFrame(glide); };
       if (e.deltaY > 0 && vt < D) { e.preventDefault(); push(e.deltaY); return; }
+      if (e.deltaY > 0 && hov && hov.scrollTop >= hov.scrollHeight - hov.clientHeight - 1) {   // Spalte am Ende: Rest geht an die andere Spalte
+        const o = cols.find(c => c !== hov);
+        if (o && o.scrollTop < o.scrollHeight - o.clientHeight - 1) { e.preventDefault(); o.scrollTop += e.deltaY; }
+        return;
+      }
       if (e.deltaY < 0 && vt > 0 && (!hov || hov.scrollTop <= 0)) {
         e.preventDefault();
         const o = cols.find(c => c !== hov && c.scrollTop > 0);
