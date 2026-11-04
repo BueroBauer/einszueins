@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>einszueins</title>
+  <style>
+    @font-face {
+      font-family: 'ApercuPro';
+      src: url('ApercuPro.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'ApercuPro Mono';
+      src: url('ApercuPro-Mono.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'ApercuPro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ─── Vorhang-Satz ─── */
+    .ask {
+      position: fixed; inset: 0; z-index: 150;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 8vw; text-align: center; pointer-events: none;
+      font-size: clamp(26px, 4.2vw, 64px); line-height: 1.12; letter-spacing: -0.01em;
+    }
+    .ask p { max-width: 17em; }
+    .ask .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; }
+    .ask .w i {
+      display: inline-block; font-style: normal; transform: translateY(105%); opacity: 0;
+      transition: transform .9s var(--ease), opacity .6s ease; transition-delay: calc(var(--n) * 70ms);
+    }
+    .ask.in .w i { transform: none; opacity: 1; }
+    .ask.out { opacity: 0; transform: translateY(-1.5vh); transition: opacity .7s ease, transform .9s var(--ease); }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: calc(50% + 20px);
+      width: calc(50% - 20px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px 20px 0;
+      z-index: 200;
+    }
+
+    .nav-link {
+      color: #fff;
+      text-decoration: none;
+      font-family: 'ApercuPro Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-link .bkt {
+      position: relative;
+      display: inline-block;
+    }
+    .nav-link .bkt::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0;
+    }
+    .nav-link:hover .bkt::after {
+      opacity: 1;
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 32px;
+    }
+
+    /* ─── COUNTER ─── */
+    .counter {
+      position: fixed;
+      bottom: 32px;
+      left: 40px;
+      z-index: 200;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: #fff;
+      opacity: 1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    
+    /* ─── V8: GETEILTER SLIDER, BÜHNE ÖFFNET IN DER MITTE ─── */
+    :root { --u: min(0.25381vw, 1.3198px); }
+    :root {
+      --ease: cubic-bezier(.22, 1, .36, 1);        /* ease-out-quint */
+      --ease-stage: cubic-bezier(.77, 0, .18, 1);  /* ruhig rein, ruhig raus */
+      --clipL: inset(0 0 0 100%);                  /* linke Hälfte wächst aus der Mitte nach links */
+      --clipR: inset(0 100% 0 0);
+      --outL: translateX(-101%);
+      --outR: translateX(101%);
+    }
+    body { height: 100vh; background: #0a0a0a; }
+    @supports (height: 100dvh) { body, .stage, .site { height: 100dvh; } }
+    .nav-link, nav { display: none; }
+
+    .stage { position: fixed; inset: 0; display: flex; height: 100vh; z-index: 10; pointer-events: none; }
+    .half {
+      position: relative; flex: 1 1 50%; display: block; overflow: hidden; pointer-events: auto;
+      color: #fff; text-decoration: none; cursor: pointer; outline: none; background: #0a0a0a;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 1.05s var(--ease-stage);
+    }
+    #halfL { clip-path: var(--clipL); }
+    #halfR { clip-path: var(--clipR); }
+    .stage.shown #halfL, .stage.shown #halfR { clip-path: inset(0); }
+    .stage.intro .half { transition: clip-path 1.25s var(--ease-stage), transform 1.05s var(--ease-stage); }
+    .stage.open #halfL { transform: var(--outL); }
+    .stage.open #halfR { transform: var(--outR); }
+    .stage.open .half { cursor: default; pointer-events: none; }
+
+    .half .ph, .half .lbl { position: absolute; inset: 0; will-change: transform; backface-visibility: hidden; }
+    .half .ph { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .half .shade {
+      position: absolute; inset: 0; z-index: 2; background: rgba(0,0,0,.4);
+      transition: opacity .55s ease; pointer-events: none;
+    }
+    .half .lbl {
+      z-index: 3; display: flex; align-items: center; justify-content: center;
+      padding: 0 6%; text-align: center; pointer-events: none;
+      font-size: clamp(26px, 4.2vw, 72px); line-height: 1.05; font-weight: 400;
+    }
+    .half .lbl.logo svg { width: 40vw; height: auto; fill: #fff; display: block; }
+    #halfL .lbl.logo { justify-content: flex-end; padding: 0 5vw 0 0; }
+    #halfR .lbl.logo { justify-content: flex-start; padding: 0 0 0 5vw; }
+    @media (hover: hover) {
+      .half:hover .shade { opacity: 0; }
+    }
+    .half:focus-visible .shade { opacity: 0; }
+
+    /* Logo-Doppelpunkt mittig auf der Trennkante */
+    .colon7 {
+      --d: 3.4vw;
+      position: fixed; left: 50%; top: 50%; z-index: 150; pointer-events: none;
+      display: flex; flex-direction: column; gap: calc(var(--d) * .96);
+      transform: translate(-50%, -50%) scale(.4); opacity: 0;
+      transition: opacity .6s ease, transform .8s var(--ease);
+    }
+    .colon7::before, .colon7::after {
+      content: ''; display: block; width: var(--d); height: var(--d); border-radius: 50%; background: #fff;
+    }
+    .colon7, .colon7::before, .colon7::after { transition-property: opacity, transform, width, height, gap; }
+    .colon7::before, .colon7::after { transition-duration: .8s; }
+    .colon7.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .colon7.off { opacity: 0; transition: opacity .35s ease; }
+
+    .counter { gap: 8px; align-items: center; transition: opacity .5s ease; opacity: 0; }
+    .counter.on { opacity: 1; }
+    .counter.off { opacity: 0; transition-duration: .3s; }
+    @keyframes ring-fill { from { stroke-dashoffset: 43.98; } to { stroke-dashoffset: 0; } }
+    #auto-ring-arc { animation: ring-fill var(--hold, 8s) linear forwards; }
+    #auto-ring-arc.idle { animation: none; }
+
+    /* ─── Projekte-Seite hinter der Bühne ─── */
+    .site {
+      --bg: #f7f5f2; --pad: 20px;
+      position: fixed; inset: 0; z-index: 5; height: 100vh; background: var(--bg); color: #000;
+      overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+      visibility: hidden; opacity: 0; transition: visibility 0s linear 1.1s, opacity .01s linear 1.1s;
+      font-family: 'ApercuPro Mono', monospace; font-size: 17px; letter-spacing: .02em;
+    }
+    .site.open { visibility: visible; opacity: 1; transition-delay: 0s; }
+    .site a { color: inherit; text-decoration: none; }
+    .site .bk { position: relative; display: inline-block; }
+    .site .bk::after { content: ''; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: currentColor; transform: translate(-50%, -50%) scale(0); transition: transform .25s var(--ease); }
+    .site .on .bk::after, .site a:hover .bk::after { transform: translate(-50%, -50%) scale(1); }
+
+    .hdr { position: sticky; top: 0; height: 0; z-index: 30; }
+    .hdr > * { position: absolute; }
+    .hdr .band { display: none; left: 0; right: 0; top: 0; height: 134px; background: var(--bg); }
+    .hdr .big { left: 0; top: 0; width: 100%; height: auto; display: block; fill: #231f20; pointer-events: none; will-change: transform; }
+    .hdr .logo { top: 22px; width: 90px; height: 29px; display: block; opacity: 0; pointer-events: none; }
+    .hdr .logo svg { width: 100%; height: 100%; display: block; fill: #000; }
+    .hdr .l { left: var(--pad); } .hdr .r { right: var(--pad); }
+    .hdr .m { top: 215px; line-height: 22px; white-space: nowrap; }
+    .hdr .m.p { left: 16.3%; } .hdr .m.b { left: 66.6%; } .hdr .m.k { left: calc(66.6% + 158px); }
+    .hdr .dots { --yc: 417px; --d: 38px; --sp: 82px; left: 50%; width: 60px; margin-left: -30px; top: calc(var(--yc) - (var(--sp) + var(--d)) / 2 - 12px); height: calc(var(--sp) + var(--d) + 24px); cursor: pointer; }
+    .hdr .dots::before, .hdr .dots::after { content: ''; position: absolute; left: 50%; width: var(--d); height: var(--d); margin-left: calc(var(--d) / -2); border-radius: 50%; background: #000; top: 12px; }
+    .hdr .dots::after { top: calc(12px + var(--sp)); }
+    .ftog { left: 32.6%; top: 602px; background: none; border: 0; font: inherit; letter-spacing: inherit; color: inherit; cursor: pointer; line-height: 22px; padding: 0; }
+    .fbar { height: 22px; flex: none; }
+    /* Seiten-Intro: Logo fährt von oben ein, der Rest blendet auf */
+    .hdr .big { translate: 0 -112%; transition: translate .6s cubic-bezier(.5,0,.75,0); }
+    .site.open .hdr .big { translate: 0 0; transition: translate 1.5s var(--ease) .55s; }
+    .hdr .m, .ftog, .pg { opacity: 0; transition: opacity .35s ease; }
+    .site.open .hdr .m, .site.open .ftog, .site.open .pg { opacity: 1; transition: opacity .9s ease 1.05s; }
+    .site.open .hdr .m.b { transition-delay: 1.2s; } .site.open .hdr .m.k { transition-delay: 1.35s; }
+    .site.open .ftog { transition-delay: 1.5s; } .site.open .pg { transition-delay: 1.7s; }
+    .colon7.ink::before, .colon7.ink::after { background: #000; transition: background .7s ease; }
+    .colon7.gone { opacity: 0; transition: none; }
+    .fwrap { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .5s var(--ease); margin-top: 21px; }
+    .fwrap.closed { grid-template-rows: 0fr; }
+    .fwrap > div { overflow: hidden; min-height: 0; }
+    .tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 var(--pad) 17px; font-family: 'ApercuPro', sans-serif; letter-spacing: 0; }
+    .tag { background: transparent; box-shadow: inset 0 0 0 2px #fff; border-radius: 4px; height: 29px; padding: 0 20px; display: inline-flex; align-items: center; font-size: 18px; text-transform: uppercase; color: #000; transition: background .2s ease, color .2s ease; }
+    @media (hover: hover) { .tag:hover { background: #fff; color: #000; } }
+    .tag.main { background: #000; color: #fff; box-shadow: none; }
+    .tag.more, .mh, .mmenu { display: none; }
+    .tag.more { background: none; color: #000; box-shadow: none; border: 0; font: inherit; font-size: 16px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+    @media (hover: hover) { .tag.more:hover { background: none; color: #000; } }
+    .tag.on { background: #fff; color: #000; box-shadow: none; }
+    @media (hover: hover) { .tag.main:hover, .tag:hover { background: #fff; color: #000; box-shadow: none; } }
+
+    .gal { display: grid; grid-template-columns: 930fr 459fr; column-gap: 11px; padding: 0 var(--pad); align-items: start; }
+    .col { display: flex; flex-direction: column; }
+    .ft.fl { justify-content: flex-start; }
+    .ft.fl .ad { text-align: left; }
+    @media (min-width: 1024px), (min-width: 768px) and (orientation: landscape) {
+      .site { overflow: hidden; }
+      .pg { position: absolute; left: 0; right: 0; top: 90px; bottom: 0; display: flex; flex-direction: column; will-change: transform; }
+      .gal { flex: 1 1 0; min-height: 0; align-items: stretch; }
+      .col { height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+      .col::-webkit-scrollbar { display: none; }
+      .ft { margin-top: auto; }
+      .ft.fl, .ft.fr { min-height: 280px; }
+    }
+    .it { margin-bottom: 98px; }
+    .it img { display: block; width: 100%; height: auto; }
+    .it .t { display: block; width: 143px; height: 29px; margin: 14px 0 0; background: #fff; border-radius: 4px; text-align: center; line-height: 29px; font-size: 18px; font-family: 'ApercuPro Mono', monospace; text-transform: uppercase; }
+    .it .n { display: flex; align-items: center; gap: 10px; margin-top: 11px; line-height: 22px; }
+    .col.r .it:first-child { margin-bottom: 75px; }
+    .it .n::before { content: ''; flex: none; width: 16px; height: 16px; border-radius: 50%; background: var(--c, #000); }
+
+    .ft { display: flex; justify-content: flex-end; align-items: flex-end; padding: 60px 0 21px; font-size: 14px; text-transform: uppercase; line-height: 22px; }
+    .ft .lk { display: flex; gap: 90px; }
+    .ft .ad { width: 100%; max-width: 362px; display: grid; grid-template-columns: 126px 1fr auto; grid-auto-rows: 24px; align-items: center; text-align: left; font-family: 'ApercuPro Mono', monospace; font-size: 16px; line-height: 24px; letter-spacing: .02em; white-space: nowrap; }
+    .ft .ad a { color: inherit; text-decoration: none; }
+    .ft .ad .r1 { grid-column: 1 / -1; display: flex; justify-content: space-between; }
+    .ft .ad svg { grid-row: 2 / 4; grid-column: 1; width: 38px; height: 34px; justify-self: start; }
+    .ft .ad .ln { grid-column: 2 / -1; margin-left: 2px; display: flex; align-items: center; gap: 5px; }
+    .ft .ad .ln i { width: 10px; height: 10px; box-sizing: border-box; border: 1px solid #000; border-radius: 50%; flex: none; }
+    .ft .ad .ln.sp span:last-child, .ft .ad .ln.rt a { margin-left: auto; }
+    .ft .ad .l4 { grid-column: 1 / 3; }
+    .ft .ad .r4 { grid-column: 3; justify-self: end; }
+    .ft .ad a:hover { text-decoration: underline; }
+
+    @media (max-width: 767px), (max-width: 1023px) and (orientation: portrait) {
+      :root {
+        --clipL: inset(100% 0 0 0);   /* obere Hälfte wächst aus der Mitte nach oben */
+        --clipR: inset(0 0 100% 0);
+        --outL: translateY(-101%);
+        --outR: translateY(101%);
+      }
+      .stage { flex-direction: column; }
+      .half .lbl { font-size: clamp(26px, 8vw, 48px); }
+      .colon7 { --d: 9vw; gap: calc(var(--d) * 1.28); flex-direction: row; }
+      .half .lbl.logo svg { width: 92vw; }
+      #halfL .lbl.logo, #halfR .lbl.logo { justify-content: center; padding: 0; }
+      #halfL .lbl.logo svg { transform: rotate(180deg); }
+      .counter { left: 16px; bottom: calc(env(safe-area-inset-bottom) + 20px); }
+      .site { --pad: 16px; font-size: 16px; }
+      .pg { padding-top: calc(124 * var(--u)); }
+      .fbar { display: none; }
+      .ft { order: var(--o); }
+      .tags { justify-content: flex-start; }
+      .tag { font-size: 16px; padding: 0 14px; }
+      .it .t { font-size: 16px; }
+      .gal { display: block; }
+      .col { display: contents; }
+      .it { order: var(--o); margin-bottom: 104px; }
+      .gal { display: flex; flex-direction: column; }
+      .ft { flex-direction: column; align-items: stretch; gap: 36px; padding-top: 60px; }
+      .ft .ad { width: 100%; max-width: 362px; align-self: flex-end; }
+
+      /* ── Mobil: Wortmarke eins : eins, Doppelpunkt = Menü, Overlay wie v3 ── */
+      .hdr { display: none; }
+      .mh { position: fixed; top: 0; left: 0; right: 0; height: calc(86 * var(--u)); z-index: 60; display: block; background: var(--bg); pointer-events: none; transition: background .3s ease; }
+      .mh .wm { position: absolute; top: calc(22 * var(--u)); width: calc(86 * var(--u)); height: auto; display: block; filter: invert(1); transition: filter .3s ease; pointer-events: none; }
+      .mh a.wm { pointer-events: auto; display: block; }
+      .mh .wm img { width: 100%; display: block; }
+      .mh .wl { left: calc(16 * var(--u)); } .mh .wr { right: calc(11 * var(--u)); }
+      .mh .mbtn { pointer-events: auto; position: absolute; left: 50%; top: calc(19 * var(--u)); transform: translateX(-50%); width: calc(26 * var(--u)); height: calc(40 * var(--u)); padding: 0; border: 0; border-radius: 4px; background: #fff; color: #000; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(7 * var(--u)); -webkit-tap-highlight-color: transparent; }
+      .mh .mbtn i { width: calc(8 * var(--u)); height: calc(8 * var(--u)); border-radius: 50%; background: #000; display: block; }
+      .site.menu-open .mh { background: transparent; }
+      .site.menu-open .mh .wm { filter: none; }
+      .site.menu-open .mh .mbtn i { display: none; }
+      .site.menu-open .mh .mbtn::before { content: '\00d7'; font: 400 calc(22 * var(--u))/calc(40 * var(--u)) 'ApercuPro', Helvetica, Arial, sans-serif; }
+      .site.menu-open .mh .mbtn { background: #fff; }
+      .mmenu { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 0; padding: calc(60 * var(--u)) var(--pad) calc(149 * var(--u)); background: #000; transform: translateY(-100%); visibility: hidden; transition: transform .55s cubic-bezier(.77,0,.18,1), visibility 0s linear .55s; }
+      .mmenu.open { transform: translateY(0); visibility: visible; transition-delay: 0s; }
+      .mmenu a.m-link { color: #fff; text-decoration: none; line-height: calc(81 * var(--u)); font-family: 'ApercuPro', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: clamp(40px, 12.7vw, 72px); transition: color .2s; }
+      .mmenu:has(a.m-link:hover) a.m-link:not(:hover), .mmenu:has(a.m-link:focus-visible) a.m-link:not(:focus-visible) { color: #a9a9a9; }
+      .mmenu a.m-habitat { margin-top: calc(49 * var(--u)); min-width: calc(178 * var(--u)); text-align: center; background: #fff; color: #000; text-decoration: none; font-family: 'ApercuPro Mono', monospace; font-size: calc(14 * var(--u)); letter-spacing: .08em; text-transform: uppercase; line-height: calc(36 * var(--u)); padding: 0 calc(20 * var(--u)); border-radius: 2px; }
+      .mmenu .menu-foot { position: absolute; left: calc(16 * var(--u)); right: calc(16 * var(--u)); bottom: calc(env(safe-area-inset-bottom) + 19 * var(--u)); display: grid; grid-template-columns: calc(126 * var(--u)) 1fr auto; grid-auto-rows: calc(24 * var(--u)); align-items: center; text-align: left; font-family: 'ApercuPro Mono', monospace; font-size: 16px; line-height: calc(24 * var(--u)); letter-spacing: .02em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+      .menu-foot a { color: inherit; text-decoration: none; }
+      .menu-foot .r1 { grid-column: 1 / -1; display: flex; justify-content: space-between; }
+      .menu-foot svg { grid-row: 2 / 4; grid-column: 1; width: calc(38 * var(--u)); height: calc(34 * var(--u)); justify-self: start; }
+      .menu-foot .ln { grid-column: 2 / -1; margin-left: calc(2 * var(--u)); display: flex; align-items: center; gap: calc(5 * var(--u)); }
+      .menu-foot .ln i { width: calc(10 * var(--u)); height: calc(10 * var(--u)); box-sizing: border-box; border: 1px solid #fff; border-radius: 50%; flex: none; }
+      .menu-foot .ln.sp, .menu-foot .ln.rt { justify-content: flex-start; }
+      .menu-foot .ln.sp span:last-child, .menu-foot .ln.rt a { margin-left: auto; }
+      .menu-foot .l4 { grid-column: 1 / 3; } .menu-foot .r4 { grid-column: 3; justify-self: end; }
+      .mmenu .m-link, .mmenu .m-habitat, .mmenu .menu-foot { opacity: 0; transform: translateY(16px); transition: opacity .2s ease, transform .2s ease, color .2s; }
+      .mmenu.open .m-link, .mmenu.open .m-habitat, .mmenu.open .menu-foot { opacity: 1; transform: none; transition: opacity .6s cubic-bezier(.22,1,.36,1) var(--d), transform .6s cubic-bezier(.22,1,.36,1) var(--d), color .2s; }
+      .mmenu .m-link:nth-of-type(1) { --d: .30s; } .mmenu .m-link:nth-of-type(2) { --d: .38s; } .mmenu .m-link:nth-of-type(3) { --d: .46s; }
+      .mmenu .m-habitat { --d: .56s; } .mmenu .menu-foot { --d: .66s; }
+      /* Filter: wie Vorlage, erste 5 Tags sichtbar, Rest hinter "Mehr..." */
+      .tag { padding: 0 22px; }
+      .tags { gap: 8px; padding-bottom: 26px; }
+      .tags .tag.x { display: none; }
+      .tags.all .tag.x { display: inline-flex; }
+      .tag.more { display: inline-flex; }
+      /* Filter bleibt beim Scrollen unter der Kopfzeile stehen, wie am Desktop */
+      .ftog { position: sticky; top: calc(86 * var(--u)); z-index: 20; display: block; width: 100%; box-sizing: border-box; height: 46px; padding: 12px var(--pad); text-align: left; background: var(--bg); font-size: 17px; }
+      .fwrap { position: sticky; top: calc(86 * var(--u) + 46px); z-index: 19; background: var(--bg); margin-top: 0; }
+      .fwrap > div { overflow-y: auto; max-height: calc(100vh - 86 * var(--u) - 46px - 24px); }
+    }
+    @media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) { .hdr .m.k { left: calc(66.6% + 140px); } }
+    @media (prefers-reduced-motion: reduce) {
+      .ask .w i, .ask.out { transition-duration: .01s !important; transition-delay: 0s !important; }
+      .hdr .big, .hdr .m, .ftog, .pg { transition-duration: .01s !important; transition-delay: 0s !important; }
+      .half, .colon7, .fwrap, .site .bk::after { transition-duration: .01s !important; transition-delay: 0s !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="stage" id="stage">
+    <a class="half" id="halfL" href="#wohnbau"><span class="shade"></span></a>
+    <a class="half" id="halfR" href="#klimaschutz"><span class="shade"></span></a>
+  </main>
+  <div class="colon7" id="colon" aria-hidden="true"></div>
+  <div class="ask" id="ask"><p id="askText"></p></div>
+
+  <section class="site" id="site" aria-hidden="true">
+    <header class="mh" id="mh">
+      <a class="wm wl" id="mBack" href="#" aria-label="eins, zurück zur Startbühne"><img src="img/Group 233.svg" alt="eins"></a>
+      <button class="mbtn" id="menuBtn" type="button" aria-label="Menü" aria-expanded="false" aria-controls="mmenu"><i></i><i></i></button>
+      <span class="wm wr"><img src="img/Group 233.svg" alt="eins"></span>
+    </header>
+    <div class="mmenu" id="mmenu" aria-hidden="true">
+      <a class="m-link" href="#projekte">Projekte</a>
+      <a class="m-link" href="#buero">Über uns</a>
+      <a class="m-link" href="#kontakt">Kontakt</a>
+      <a class="m-habitat" href="#">Habitat 2030</a>
+      <div class="menu-foot">
+        <div class="r1"><span>einszueins architektur zt</span><span>gmbh</span></div>
+        <svg viewBox="0 0 38 34" fill="none" stroke="#fff" stroke-width="1" aria-hidden="true"><ellipse cx="19" cy="17" rx="18" ry="16"/><ellipse cx="19" cy="17" rx="8" ry="16"/><path d="M19 1v32M1 17h36M4 8c9 3 21 3 30 0M4 26c9-3 21-3 30 0"/></svg>
+        <div class="ln sp"><i></i><span>Krakauer Straße</span><span>19/2</span></div>
+        <div class="ln rt"><i></i><a href="mailto:office@einszueins.at">office@einszueins.at</a></div>
+        <span class="l4">1020 wien</span><span class="r4">Austria</span>
+      </div>
+    </div>
+    <header class="hdr" id="hdr">
+      <span class="band"></span>
+      <svg class="big" id="big" viewBox="0 0 1438 185" aria-hidden="true"><path d="M155.389 109.608H40.6655C42.2158 138.581 56.4788 161.323 84.6946 161.323C107.639 161.323 119.422 150.731 128.104 131.415L151.048 141.385C136.475 171.915 116.941 185 84.6946 185C37.2548 185 14 146.058 14 104C14 61.9423 37.2548 23 84.6946 23C132.134 23 155.389 58.5154 155.389 97.4577V109.608ZM42.2158 85.9308H128.104C123.453 63.5 109.81 46.6769 84.6946 46.6769C59.5794 46.6769 46.8668 63.1885 42.2158 85.9308Z"/><path d="M225.774 25.4923V182.508H199.728V25.4923H225.774Z"/><path d="M395.999 182.508H369.953V78.7654C369.953 57.2692 360.341 46.6769 342.978 46.6769C319.723 46.6769 298.329 73.1577 298.329 116.773V182.508H272.283V25.4923H298.329V54.4654C309.801 34.2154 328.405 23 350.109 23C378.635 23 395.999 40.7577 395.999 71.9115V182.508Z"/><path d="M535.527 46.9885L517.854 62.2538C507.622 51.0385 500.18 46.6769 489.328 46.6769C478.476 46.6769 470.414 53.8423 470.414 66.6154C470.414 94.9654 542.969 89.0462 542.969 135.154C542.969 166.619 522.815 185 491.188 185C459.562 185 440.958 163.815 432.896 142.631L454.911 130.481C461.732 147.304 473.825 161.323 491.188 161.323C507.002 161.323 516.303 153.223 516.303 136.712C516.303 107.427 444.369 117.396 444.369 66.3038C444.369 42.0038 462.042 23 490.258 23C509.482 23 524.675 31.4115 535.527 46.9885Z"/><path d="M1034.42 109.608H919.697C921.247 138.581 935.51 161.323 963.726 161.323C986.67 161.323 998.453 150.731 1007.13 131.415L1030.08 141.385C1015.51 171.915 995.972 185 963.726 185C916.286 185 893.031 146.058 893.031 104C893.031 61.9423 916.286 23 963.726 23C1011.17 23 1034.42 58.5154 1034.42 97.4577V109.608ZM921.247 85.9308H1007.13C1002.48 63.5 988.841 46.6769 963.726 46.6769C938.61 46.6769 925.898 63.1885 921.247 85.9308Z"/><path d="M1104.8 25.4923V182.508H1078.76V25.4923H1104.8Z"/><path d="M1275.03 182.508H1248.98V78.7654C1248.98 57.2692 1239.37 46.6769 1222.01 46.6769C1198.75 46.6769 1177.36 73.1577 1177.36 116.773V182.508H1151.31V25.4923H1177.36V54.4654C1188.83 34.2154 1207.44 23 1229.14 23C1257.67 23 1275.03 40.7577 1275.03 71.9115V182.508Z"/><path d="M1414.56 46.9885L1396.88 62.2538C1386.65 51.0385 1379.21 46.6769 1368.36 46.6769C1357.51 46.6769 1349.45 53.8423 1349.45 66.6154C1349.45 94.9654 1422 89.0462 1422 135.154C1422 166.619 1401.85 185 1370.22 185C1338.59 185 1319.99 163.815 1311.93 142.631L1333.94 130.481C1340.76 147.304 1352.86 161.323 1370.22 161.323C1386.03 161.323 1395.33 153.223 1395.33 136.712C1395.33 107.427 1323.4 117.396 1323.4 66.3038C1323.4 42.0038 1341.07 23 1369.29 23C1388.51 23 1403.71 31.4115 1414.56 46.9885Z"/><path d="M580.006 25.4922H684.808V36.7076L610.703 158.831H687.599V182.508H575.976V171.292L649.771 49.1691H580.006V25.4922Z"/><path d="M728.527 25.4922H754.573V129.235C754.573 150.731 764.185 161.323 781.548 161.323C804.803 161.323 826.197 134.842 826.197 91.2268V25.4922H852.243V182.508H826.197V153.535C814.725 173.785 796.121 185 774.417 185C745.891 185 728.527 167.242 728.527 136.088V25.4922Z"/></svg>
+      <a class="logo l" id="back" href="#" aria-label="eins, zurück zur Startbühne"><svg viewBox="0 0 529 162" aria-hidden="true"><path d="M141.389 86.6077H26.6655C28.2158 115.581 42.4788 138.323 70.6946 138.323C93.6393 138.323 105.422 127.731 114.104 108.415L137.048 118.385C122.475 148.915 102.941 162 70.6946 162C23.2548 162 0 123.058 0 81C0 38.9423 23.2548 0 70.6946 0C118.134 0 141.389 35.5154 141.389 74.4577V86.6077ZM28.2158 62.9308H114.104C109.453 40.5 95.8097 23.6769 70.6946 23.6769C45.5794 23.6769 32.8668 40.1885 28.2158 62.9308Z"/><path d="M211.773 2.49219V159.508H185.728V2.49219H211.773Z"/><path d="M381.999 159.508H355.953V55.7654C355.953 34.2692 346.341 23.6769 328.978 23.6769C305.723 23.6769 284.329 50.1577 284.329 93.7731V159.508H258.283V2.49231H284.329V31.4654C295.801 11.2154 314.405 0 336.109 0C364.635 0 381.999 17.7577 381.999 48.9115V159.508Z"/><path d="M521.528 23.9885L503.854 39.2538C493.622 28.0385 486.18 23.6769 475.328 23.6769C464.476 23.6769 456.414 30.8423 456.414 43.6154C456.414 71.9654 528.969 66.0462 528.969 112.154C528.969 143.619 508.815 162 477.189 162C445.562 162 426.958 140.815 418.896 119.631L440.911 107.481C447.732 124.304 459.825 138.323 477.189 138.323C493.002 138.323 502.304 130.223 502.304 113.712C502.304 84.4269 430.369 94.3961 430.369 43.3038C430.369 19.0038 448.042 0 476.258 0C495.482 0 510.675 8.41154 521.528 23.9885Z"/></svg></a>
+      <a class="m p on" href="#projekte">[<span class="bk">&nbsp;</span>] projekte</a>
+      <a class="dots" id="dotsBack" href="#" aria-label="zurück zur Startbühne"></a>
+      <a class="m b" href="#buero">[<span class="bk">&nbsp;</span>] über uns</a>
+      <a class="m k" href="#kontakt">[<span class="bk">&nbsp;</span>] kontakt</a>
+      <a class="logo r" href="#" aria-label="eins"><svg viewBox="0 0 529 162" aria-hidden="true"><path d="M141.389 86.6077H26.6655C28.2158 115.581 42.4788 138.323 70.6946 138.323C93.6393 138.323 105.422 127.731 114.104 108.415L137.048 118.385C122.475 148.915 102.941 162 70.6946 162C23.2548 162 0 123.058 0 81C0 38.9423 23.2548 0 70.6946 0C118.134 0 141.389 35.5154 141.389 74.4577V86.6077ZM28.2158 62.9308H114.104C109.453 40.5 95.8097 23.6769 70.6946 23.6769C45.5794 23.6769 32.8668 40.1885 28.2158 62.9308Z"/><path d="M211.773 2.49219V159.508H185.728V2.49219H211.773Z"/><path d="M381.999 159.508H355.953V55.7654C355.953 34.2692 346.341 23.6769 328.978 23.6769C305.723 23.6769 284.329 50.1577 284.329 93.7731V159.508H258.283V2.49231H284.329V31.4654C295.801 11.2154 314.405 0 336.109 0C364.635 0 381.999 17.7577 381.999 48.9115V159.508Z"/><path d="M521.528 23.9885L503.854 39.2538C493.622 28.0385 486.18 23.6769 475.328 23.6769C464.476 23.6769 456.414 30.8423 456.414 43.6154C456.414 71.9654 528.969 66.0462 528.969 112.154C528.969 143.619 508.815 162 477.189 162C445.562 162 426.958 140.815 418.896 119.631L440.911 107.481C447.732 124.304 459.825 138.323 477.189 138.323C493.002 138.323 502.304 130.223 502.304 113.712C502.304 84.4269 430.369 94.3961 430.369 43.3038C430.369 19.0038 448.042 0 476.258 0C495.482 0 510.675 8.41154 521.528 23.9885Z"/></svg></a>
+      <button class="ftog" id="ftog" aria-expanded="false" aria-controls="fwrap">[+] filter</button>
+    </header>
+    <div class="pg" id="pg">
+      <div class="fbar"></div>
+    <div class="fwrap closed" id="fwrap"><div><div class="tags"><a class="tag main" href="#forschung">Forschung</a><a class="tag main" href="#thema">Thema</a><a class="tag main" href="#architektur">Architektur</a><a class="tag" href="#holzbau">Holzbau</a><a class="tag" href="#quartier">Quartier</a><a class="tag" href="#bestand">Bestand</a><a class="tag" href="#baugruppen">Baugruppen</a><a class="tag" href="#wohnbau">Wohnbau</a><a class="tag" href="#klimawandelanpassung">Klimawandelanpassung</a><a class="tag" href="#partizipation">Partizipation</a><a class="tag" href="#klimaschutz">Klimaschutz</a><button class="tag more" id="moreBtn" type="button" aria-expanded="false">+ Mehr...</button></div></div></div>
+    <main class="gal" id="gal">
+      <div class="col l">
+<article class="it" style="--o:1"><img src="img/projekte/b1.jpg" width="930" height="622" alt="Gleis 21" loading="lazy"><span class="t">Architektur</span><span class="n">Gleis 21</span></article>
+<article class="it" style="--o:4"><img src="img/projekte/b2.jpg" width="930" height="622" alt="die Hauswirtschaft" loading="lazy"><span class="t">Architektur</span><span class="n">die Hauswirtschaft</span></article>
+<article class="it" style="--o:7"><img src="img/projekte/b3.jpg" width="930" height="622" alt="vis à vis" loading="lazy"><span class="t">Architektur</span><span class="n">vis à vis</span></article>
+<article class="it" style="--o:10"><img src="img/projekte/b4.jpg" width="930" height="622" alt="Auenweide" loading="lazy"><span class="t">Architektur</span><span class="n">Auenweide</span></article>
+<article class="it" style="--o:12"><img src="img/projekte/b5.jpg" width="930" height="620" alt="Wohnprojekt Wien" loading="lazy"><span class="t">Architektur</span><span class="n">Wohnprojekt Wien</span></article>
+      <footer class="ft fl" style="--o:98"><div class="ad">
+        <div class="r1"><span>einszueins architektur zt</span><span>gmbh</span></div>
+        <svg viewBox="0 0 38 34" fill="none" stroke="#000" stroke-width="1" aria-hidden="true"><ellipse cx="19" cy="17" rx="18" ry="16"/><ellipse cx="19" cy="17" rx="8" ry="16"/><path d="M19 1v32M1 17h36M4 8c9 3 21 3 30 0M4 26c9-3 21-3 30 0"/></svg>
+        <div class="ln sp"><i></i><span>Krakauer Straße</span><span>19/2</span></div>
+        <div class="ln rt"><i></i><a href="mailto:office@einszueins.at">office@einszueins.at</a></div>
+        <span class="l4">1020 wien</span><span class="r4">Austria</span>
+      </div></footer>
+      </div>
+      <div class="col r" id="colR">
+<article class="it" style="--o:2;--c:#7a8e73"><img src="img/projekte/r1.jpg" width="459" height="559" alt="Re:Concrete" loading="lazy"><span class="t">Thema</span><span class="n">Re:Concrete</span></article>
+<article class="it" style="--o:3;--c:#d8af57"><img src="img/projekte/r2.jpg" width="459" height="559" alt="Partizipation" loading="lazy"><span class="t">Thema</span><span class="n">Partizipation</span></article>
+<article class="it" style="--o:5;--c:#d8af57"><img src="img/projekte/r3.jpg" width="459" height="561" alt="Partizipation" loading="lazy"><span class="t">Forschung</span><span class="n">Partizipation</span></article>
+<article class="it" style="--o:6;--c:#d8af57"><img src="img/projekte/r4.jpg" width="459" height="559" alt="Ökobilanzierung" loading="lazy"><span class="t">Thema</span><span class="n">Ökobilanzierung</span></article>
+<article class="it" style="--o:8;--c:#d8af57"><img src="img/projekte/r5.jpg" width="459" height="559" alt="HTK" loading="lazy"><span class="t">Forschung</span><span class="n">HTK</span></article>
+<article class="it" style="--o:9;--c:#597384"><img src="img/projekte/r6.jpg" width="459" height="559" alt="Transform_Ternitz" loading="lazy"><span class="t">Forschung</span><span class="n">Transform_Ternitz</span></article>
+<article class="it" style="--o:11;--c:#597384"><img src="img/projekte/r7.jpg" width="459" height="559" alt="Stadtwandel" loading="lazy"><span class="t">Forschung</span><span class="n">Stadtwandel</span></article>
+      <footer class="ft fr" style="--o:99"><div class="lk"><a href="#datenschutz">Datenschutz</a><a href="#impressum">Impressum</a></div></footer>
+      </div>
+    </main>
+    </div>
+
+  </section>
+
+  <div class="counter" id="counter">
+    <span id="counter-text">01/04</span>
+    <svg id="auto-ring" width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0">
+      <circle cx="9" cy="9" r="7" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+      <circle id="auto-ring-arc" class="idle" cx="9" cy="9" r="7" fill="none" stroke="#fff" stroke-width="1.5"
+        stroke-dasharray="43.98" stroke-dashoffset="43.98"
+        stroke-linecap="round" transform="rotate(-90 9 9)"/>
+    </svg>
+  </div>
+
+  <script>
+    // Paare: links / rechts
+    const PAIRS = [
+      [{ t: 'Wohnbau',             s: 'wohnbau',             img: 'img/046-20260621-DSC_4368-411-Gleis%2021-Luiza%20Puiu.jpg' },
+       { t: 'Klimaschutz',         s: 'klimaschutz',          img: 'img/07_Platten%20auf%20LKW.jpg' }],
+      [{ t: 'Kreislaufwirtschaft', s: 'kreislaufwirtschaft', img: 'img/IMG_3101.jpg' },
+       { t: 'Holzbau',             s: 'holzbau',             img: 'img/017-20260629-PNL_8057-240-Vis%20a%20Wien-Luiza%20Puiu.jpg' }],
+      [{ t: 'Planung',             s: 'planung',             img: 'img/Gleis21_DSC5043_exp_A4.jpg' },
+       { t: 'Forschung',           s: 'forschung',            img: 'img/Auenweide_DSC6047_33_38_exp_A4.jpg' }],
+      [{ t: 'Partizipation',       s: 'partizipation',       img: 'img/033-20260620-PNL_7044-607-Laubengangfest-Luiza%20Puiu.jpg' },
+       { t: 'Beratung',            s: 'beratung',            img: 'img/201907050806-0011-PNL_6854-Philipp%20Naderer-Puiu.jpg' }],
+      [{ t: 'eins', s: 'eins', logo: true, img: 'img/2024-05-04_10-45-DSC_2360-432-Luiza%20Puiu.jpg' },
+       { t: 'eins', s: 'eins', logo: true, img: 'img/005-20260727-DSC_9162-799-Gerhild-LeLac-Luiza%20Puiu.jpg' }]
+    ];
+    const LOGO = '<svg viewBox="0 0 529 162" aria-hidden="true"><path d="M141.389 86.6077H26.6655C28.2158 115.581 42.4788 138.323 70.6946 138.323C93.6393 138.323 105.422 127.731 114.104 108.415L137.048 118.385C122.475 148.915 102.941 162 70.6946 162C23.2548 162 0 123.058 0 81C0 38.9423 23.2548 0 70.6946 0C118.134 0 141.389 35.5154 141.389 74.4577V86.6077ZM28.2158 62.9308H114.104C109.453 40.5 95.8097 23.6769 70.6946 23.6769C45.5794 23.6769 32.8668 40.1885 28.2158 62.9308Z"/><path d="M211.773 2.49219V159.508H185.728V2.49219H211.773Z"/><path d="M381.999 159.508H355.953V55.7654C355.953 34.2692 346.341 23.6769 328.978 23.6769C305.723 23.6769 284.329 50.1577 284.329 93.7731V159.508H258.283V2.49231H284.329V31.4654C295.801 11.2154 314.405 0 336.109 0C364.635 0 381.999 17.7577 381.999 48.9115V159.508Z"/><path d="M521.528 23.9885L503.854 39.2538C493.622 28.0385 486.18 23.6769 475.328 23.6769C464.476 23.6769 456.414 30.8423 456.414 43.6154C456.414 71.9654 528.969 66.0462 528.969 112.154C528.969 143.619 508.815 162 477.189 162C445.562 162 426.958 140.815 418.896 119.631L440.911 107.481C447.732 124.304 459.825 138.323 477.189 138.323C493.002 138.323 502.304 130.223 502.304 113.712C502.304 84.4269 430.369 94.3961 430.369 43.3038C430.369 19.0038 448.042 0 476.258 0C495.482 0 510.675 8.41154 521.528 23.9885Z"/></svg>';
+    const HOLD = 6000;                 // Ruhezeit zwischen zwei Wechseln
+    const EASE = 'cubic-bezier(.22,1,.36,1)';
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const $ = id => document.getElementById(id);
+    const stage = $('stage'), colon = $('colon'), counterBox = $('counter'), site = $('site');
+    const sides = [$('halfL'), $('halfR')];
+    const arc = $('auto-ring-arc'), counter = $('counter-text');
+    document.documentElement.style.setProperty('--hold', HOLD / 1000 + 's');
+
+    // Folien aufbauen: Bild und Text je eigene Ebene, damit der Text leicht versetzt folgt
+    const layers = sides.map((half, k) => PAIRS.map(pair => {
+      const img = document.createElement('img');
+      img.className = 'ph'; img.src = pair[k].img; img.alt = ''; img.decoding = 'async';
+      const lbl = document.createElement('span');
+      lbl.className = 'lbl'; if (pair[k].logo) { lbl.classList.add('logo'); lbl.innerHTML = LOGO; } else lbl.textContent = pair[k].t;
+      half.insertBefore(img, half.querySelector('.shade'));
+      half.appendChild(lbl);
+      return { img, lbl };
+    }));
+
+    // Gegengleich vertikal: links läuft alles nach oben raus und Neues kommt von unten, rechts umgekehrt.
+    const mobMq = matchMedia('(max-width: 767px), (max-width: 1023px) and (orientation: portrait)');
+    function place(el, side, state, ms = 0, delay = 0) {
+      const sign = side ? 1 : -1;
+      const x = state === 'in' ? 0 : state === 'out' ? sign * 100 : -sign * 100;
+      el.style.transition = ms ? 'transform ' + ms + 'ms ' + (ms < 1000 ? 'ease' : EASE) + ' ' + delay + 'ms' : 'none';
+      el.style.transform = mobMq.matches ? 'translate3d(' + x + '%,0,0)' : 'translate3d(0,' + x + '%,0)';   // mobil horizontal, Desktop vertikal
+    }
+    layers.forEach((arr, k) => arr.forEach(l => { place(l.img, k, 'wait'); place(l.lbl, k, 'wait'); }));
+
+    let cur = [0, 0], busy = false, opened = false;
+    function setCounter(i) {
+      counter.textContent = String(i + 1).padStart(2, '0') + '/' + String(PAIRS.length).padStart(2, '0');
+    }
+    function setLink(k) {
+      sides[k].href = '#' + PAIRS[cur[k]][k].s; sides[k].setAttribute('aria-label', PAIRS[cur[k]][k].t);
+    }
+    // ms: Dauer des Bilds. Text läuft länger und startet leicht später.
+    // Wechselt nur die angegebenen Seiten
+    function change(to, ms, stagger, only = [0, 1]) {
+      only.forEach(k => {
+        const d = k ? stagger : 0;
+        const from = cur[k]; cur[k] = to; setCounter(to); setLink(k);
+        const a = layers[k][from], b = layers[k][to];
+        place(b.img, k, 'wait'); place(b.lbl, k, 'wait');
+        b.img.getBoundingClientRect();
+        place(a.img, k, 'out', ms, d);       place(a.lbl, k, 'out', ms, d);
+        place(b.img, k, 'in',  ms, d);       place(b.lbl, k, 'in',  ms, d);
+      });
+    }
+
+    function startRing() {
+      arc.classList.remove('idle');
+      arc.style.animation = 'none'; arc.getBoundingClientRect(); arc.style.animation = '';
+    }
+    arc.addEventListener('animationend', () => { if (busy || opened) { startRing(); return; } change((cur[0] + 1) % PAIRS.length, 800, 0); startRing(); });
+
+    // Mausrad / Trackpad: ein Impuls = ein Wechsel, danach kurze Sperre gegen Nachlaufen
+    let wheelLock = false;
+    addEventListener('wheel', e => {
+      if (opened || busy || wheelLock || Math.abs(e.deltaY) < 6) return;
+      wheelLock = true; setTimeout(() => { wheelLock = false; }, 1800);
+      change((cur[0] + (e.deltaY > 0 ? 1 : -1) + PAIRS.length) % PAIRS.length, 800, 0);
+      startRing();
+    }, { passive: true });
+
+    // ── Bühne öffnet sich in der Mitte, Seite erscheint dahinter ──
+    function openSite(k) {
+      if (opened || busy) return;
+      opened = true;
+      arc.style.animationPlayState = 'paused';
+      site.scrollTop = 0; vs = vt = 0; render(); document.querySelectorAll('.col').forEach(c => { c.scrollTop = 0; }); last.fill(0);
+      history.replaceState(null, '', '#' + PAIRS[cur[k]][k].s);
+      // Slide-Headline deckt sich mit Filter-Tag: Filter offen, Tag schwarz markiert
+      const hit = [...document.querySelectorAll('.tag')].filter(t => t.getAttribute('href') === '#' + ({ planung: 'architektur' }[PAIRS[cur[k]][k].s] || PAIRS[cur[k]][k].s));
+      document.querySelectorAll('.tag').forEach(t => t.classList.toggle('on', hit.includes(t)));
+      fwrap.classList.toggle('closed', !hit.length);
+      setMore(hit.some(t => t.classList.contains('x')));
+      ftog.textContent = hit.length ? '[-] filter' : '[+] filter'; ftog.setAttribute('aria-expanded', String(!!hit.length));
+      if (deskMq.matches && !reduce) {                           // Punkte bleiben stehen und werden schwarz, die Seitenpunkte liegen deckungsgleich darunter
+        colon.classList.add('ink'); setTimeout(() => { if (opened) colon.classList.add('gone'); }, 800);
+      } else { colon.classList.remove('on'); colon.classList.add('off'); }
+      counterBox.classList.add('off');
+      site.classList.add('open'); site.setAttribute('aria-hidden', 'false');
+      stage.classList.add('open');
+    }
+    function closeSite() {
+      if (!opened) return;
+      setMenu(false);
+      stage.classList.remove('open');
+      site.classList.remove('open'); site.setAttribute('aria-hidden', 'true');
+      history.replaceState(null, '', location.pathname + location.search);
+      setTimeout(() => {
+        colon.classList.remove('off', 'gone', 'ink'); colon.classList.add('on');
+        counterBox.classList.remove('off');
+        opened = false; arc.style.animationPlayState = 'running';
+      }, reduce ? 0 : 1050);
+    }
+    const mmenu = $('mmenu'), menuBtn = $('menuBtn');
+    function setMenu(o) { mmenu.classList.toggle('open', o); site.classList.toggle('menu-open', o); menuBtn.setAttribute('aria-expanded', String(o)); mmenu.setAttribute('aria-hidden', String(!o)); }
+    menuBtn.addEventListener('click', () => setMenu(!mmenu.classList.contains('open')));
+    mmenu.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
+    $('mBack').addEventListener('click', e => { e.preventDefault(); setMenu(false); closeSite(); });
+    sides.forEach((el, k) => el.addEventListener('click', e => { e.preventDefault(); openSite(k); }));
+    $('back').addEventListener('click', e => { e.preventDefault(); closeSite(); });
+    $('dotsBack').addEventListener('click', e => { e.preventDefault(); closeSite(); });
+    const ftog = $('ftog'), fwrap = $('fwrap');
+    // Mobil: Filter-Knopf liegt im Seitenfluss, Tags ab dem 6. hinter "Mehr..."
+    const tagsEl = fwrap.querySelector('.tags'), moreBtn = $('moreBtn'), hdrEl = $('hdr');
+    const tagEls = [...tagsEl.querySelectorAll('.tag:not(.more)')];
+    tagEls.forEach((t, i) => t.classList.toggle('x', i >= 5));
+    function setMore(on) { tagsEl.classList.toggle('all', on); moreBtn.textContent = on ? '- Weniger' : '+ Mehr...'; moreBtn.setAttribute('aria-expanded', String(on)); }
+    moreBtn.addEventListener('click', () => setMore(!tagsEl.classList.contains('all')));
+    function placeFtog() {
+      if (deskMq.matches) { if (ftog.parentNode !== hdrEl) hdrEl.appendChild(ftog); }
+      else if (ftog.parentNode !== pg) pg.insertBefore(ftog, fwrap);
+    }
+    ftog.addEventListener('click', () => {
+      const closed = fwrap.classList.toggle('closed');
+      ftog.textContent = closed ? '[+] filter' : '[-] filter'; ftog.setAttribute('aria-expanded', String(!closed));
+    });
+    const cols = [...document.querySelectorAll('.col')], last = cols.map(() => 0), FOLLOW = .35;  // Gegenspalte folgt mit 35 % Tempo
+    cols.forEach((c, i) => c.addEventListener('scroll', () => {
+      const d = c.scrollTop - last[i]; last[i] = c.scrollTop;
+      if (!d || getComputedStyle(c).overflowY !== 'auto') return;
+      const o = cols[1 - i]; o.scrollTop += d * FOLLOW; last[1 - i] = o.scrollTop;
+    }, { passive: true }));
+    // ── Header-Choreografie: Logo scrollt raus, Menü und Punkte wandern in die Kopfzeile ──
+    const hdr = $('hdr'), big = $('big'), dotsEl = $('dotsBack'), pg = $('pg');
+    const hLogos = [...hdr.querySelectorAll('.logo')], hMenu = [...hdr.querySelectorAll('.m')];
+    const deskMq = matchMedia('(min-width: 1024px), (min-width: 768px) and (orientation: landscape)');
+    const lerp = (a, b, t) => a + (b - a) * t, clamp01 = v => Math.max(0, Math.min(1, v));
+    let vs = 0, vt = 0, raf = 0;                                                  // Scrollweg am Desktop (virtuell), mobil echtes scrollTop
+    function geo() {
+      const u = site.clientWidth / 1438, desk = deskMq.matches;
+      const d0 = innerWidth * .034, dots0 = Math.min(site.clientHeight / 2, 580 * u);
+      const dEnd = dots0 + d0 * 1.96 / 2 + d0 / 2, ftog0 = 602 * u - (602 * u - dEnd) / 2;   // halber Abstand Punkte zu Filter
+      return desk
+        ? { desk, Hl: 185 * u, menu0: 215 * u, menuF: 30, dots0, dotsF: 39, d0, sp0: d0 * 1.96, ftog0, ftogF: 90 }
+        : { desk, Hl: 185 * u, menu0: 62, menuF: 62, dots0: 150, dotsF: 31, d0: 22, sp0: 48, ftog0: 215, ftogF: 100 };
+    }
+    function render() {
+      const g = geo(), D = g.ftog0 - g.ftogF;
+      if (!g.desk) { ftog.style.top = ''; pg.style.transform = ''; return; }
+      const sc = g.desk ? (vs = Math.max(0, Math.min(D, vs))) : site.scrollTop;
+      vt = Math.max(0, Math.min(D, vt));
+      big.style.transform = 'translateY(' + (-sc) + 'px)';
+      const lo = clamp01((sc - g.Hl * .55) / (g.Hl * .45));
+      hLogos.forEach(l => { l.style.opacity = lo; l.style.transform = 'translateY(' + (1 - lo) * -10 + 'px)'; l.style.pointerEvents = lo > .5 ? 'auto' : 'none'; });
+      hMenu.forEach(m => { m.style.top = Math.max(g.menuF, g.menu0 - sc) + 'px'; });
+      const t0 = clamp01(sc / (g.dots0 - g.dotsF)), t = t0 * t0 * (3 - 2 * t0);
+      dotsEl.style.setProperty('--yc', Math.max(g.dotsF, g.dots0 - sc) + 'px');
+      dotsEl.style.setProperty('--d', lerp(g.d0, 9, t) + 'px');
+      dotsEl.style.setProperty('--sp', lerp(g.sp0, 15, t) + 'px');
+      $('ftog').style.top = Math.max(g.ftogF, g.ftog0 - sc) + 'px';
+      if (g.desk) { pg.style.transform = 'translateY(' + (D - sc) + 'px)'; site.style.removeProperty('--pg0'); }
+      else { pg.style.transform = ''; site.style.setProperty('--pg0', g.ftog0 + 'px'); }
+    }
+    placeFtog(); matchMedia('(min-width: 1024px), (min-width: 768px) and (orientation: landscape)').addEventListener('change', () => { placeFtog(); render(); });
+    site.addEventListener('scroll', () => { if (!deskMq.matches) render(); }, { passive: true });
+    addEventListener('resize', render);
+    function glide() {                                          // Desktop: Kopfzeile folgt dem Mausrad weich
+      vs += (vt - vs) * .14;
+      if (Math.abs(vt - vs) < .3) vs = vt;
+      render();
+      raf = vs === vt ? 0 : requestAnimationFrame(glide);
+    }
+    site.addEventListener('wheel', e => {                         // Desktop: erst die Kopfzeile, dann die Spalten
+      if (!opened || !deskMq.matches || !e.deltaY) return;
+      const D = geo().ftog0 - geo().ftogF, hov = e.target.closest && e.target.closest('.col');
+      const push = d => { vt = Math.max(0, Math.min(D, vt + d)); if (!raf) raf = requestAnimationFrame(glide); };
+      if (e.deltaY > 0 && vt < D) { e.preventDefault(); push(e.deltaY); return; }
+      if (e.deltaY > 0 && hov && hov.scrollTop >= hov.scrollHeight - hov.clientHeight - 1) {   // Spalte am Ende: Rest geht an die andere Spalte
+        const o = cols.find(c => c !== hov);
+        if (o && o.scrollTop < o.scrollHeight - o.clientHeight - 1) { e.preventDefault(); o.scrollTop += e.deltaY; }
+        return;
+      }
+      if (e.deltaY < 0 && vt > 0 && (!hov || hov.scrollTop <= 0)) {
+        e.preventDefault();
+        const o = cols.find(c => c !== hov && c.scrollTop > 0);
+        if (o) o.scrollTop += e.deltaY; else push(e.deltaY);
+      }
+    }, { passive: false });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSite(); });
+
+    // ── Intro: Punkte erscheinen, Bühne wächst aus der Mitte, Text läuft ein ──
+    setCounter(0); setLink(0); setLink(1);
+    const ask = $('ask');
+    $('askText').innerHTML = 'Wie kann Planen und Bauen innerhalb der planetaren Grenzen gelingen?'
+      .split(' ').map((w, n) => '<span class="w"><i style="--n:' + n + '">' + w + '</i></span>').join(' ');
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    layers.forEach(arr => arr.forEach(l => l.img.decode().catch(() => {})));   // alle Bilder vorab dekodieren, kein Ruckeln beim ersten Wechsel
+    const firstLoaded = Promise.all([0, 1].map(k => layers[k][0].img.decode().catch(() => {})));
+    (async () => {
+      if (reduce) {
+        await Promise.race([firstLoaded, wait(1500)]);
+        ask.remove();
+        layers.forEach((arr, k) => { place(arr[0].img, k, 'in'); place(arr[0].lbl, k, 'in'); });
+        stage.classList.add('shown'); colon.classList.add('on'); counterBox.classList.add('on');
+        startRing();
+        return;
+      }
+      busy = true;
+      stage.classList.add('intro');
+      layers.forEach((arr, k) => place(arr[0].img, k, 'in'));    // Bild steht, Bühne ist noch zu
+      await Promise.race([firstLoaded, wait(2000)]);
+      await wait(300);
+      ask.classList.add('in');                                   // 0. schwarzer Vorhang, Satz mittig
+      await wait(3000);
+      ask.classList.add('out');
+      await wait(800);
+      colon.classList.add('on');                                 // 1. Punkte
+      await wait(650);
+      stage.classList.add('shown');                              // 2. Bühne wächst aus der Mitte
+      await wait(750);
+      layers.forEach((arr, k) => {                               // 3. Text läuft ein, rechts leicht später
+        place(arr[0].lbl, k, 'in', 1300, k ? 160 : 0);
+      });
+      counterBox.classList.add('on');
+      await wait(1500);
+      change(PAIRS.length - 1, 880, 90);                         // eigener Slide: eins | eins, direkt nach dem Durchlauf
+      await wait(1040);
+      stage.classList.remove('intro');
+      busy = false;
+      startRing();                                               // 5. danach ruhig
+    })();
+  </script>
+</body>
+</html>
